@@ -1,12 +1,28 @@
 import { loadConstellations } from "./constellation.js";
 import { createRenderer } from "./renderer.js";
-
+import { validateConstellation } from "./validator.js";
 console.log("Jogo Iniciado");
+
+
+// ELEMENTOS DO DOM
+const resultScreen =
+    document.getElementById("result-screen");
+
+const resultTitle =
+    document.getElementById("result-title");
+
+const resultMessage =
+    document.getElementById("result-message");
+
+const continueButton =
+    document.getElementById("continue-button");
 
 // CANVAS
 
 const canvas = document.getElementById("sky");
 const ctx = canvas.getContext("2d");
+const finishButton = document.getElementById("finish-button");
+const resetButton = document.getElementById("reset-button");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -27,11 +43,13 @@ const camera = {
 
 
 // ESTADO DO JOGO
+let constellations = [];
+let currentConstellation = null;
 
 let stars = [];
-let connections = [];
+let connections = []; // Conexões do jogador
 let selectedStar = null;
-
+let correctConnections = []; // Conexões real da constelação
 
 // RENDERER
 
@@ -169,31 +187,10 @@ async function startGame() {
 
     try {
 
-        // Carrega as constelações do JSON
-        const constellations =
+        constellations =
             await loadConstellations();
 
-
-        // Por enquanto usamos
-        // a primeira constelação
-        const currentConstellation =
-            constellations[0];
-
-
-        // Coloca as estrelas no nosso array
-        stars.push(
-            ...currentConstellation.stars
-        );
-
-
-        console.log(
-            "Constelação atual:",
-            currentConstellation
-        );
-
-
-        // Primeiro desenho
-        renderer.draw(selectedStar);
+        nextConstellation();
 
     }
 
@@ -206,8 +203,107 @@ async function startGame() {
 
     }
 }
-
-
 // INICIAR
 
 startGame();
+
+function loadConstellation(constellation) {
+
+    stars.length = 0;
+    connections.length = 0;
+
+    selectedStar = null;
+
+    stars.push(
+        ...constellation.stars
+    );
+
+    correctConnections =
+        constellation.connections;
+
+    renderer.draw(selectedStar);
+}
+
+function nextConstellation() {
+
+    const randomIndex =
+        Math.floor(
+            Math.random() *
+            constellations.length
+        );
+
+    currentConstellation =
+        constellations[randomIndex];
+
+    loadConstellation(
+        currentConstellation
+    );
+
+    console.log(
+        "Nova constelação:",
+        currentConstellation.name
+    );
+}
+
+function finishGame() {
+
+    const result =
+        validateConstellation(
+            connections,
+            correctConnections
+        );
+
+    showResult(result);
+}
+
+function resetGame() {
+
+    connections.length = 0;
+
+    selectedStar = null;
+
+    renderer.draw(selectedStar);
+}
+
+function showResult(isCorrect) {
+
+    resultScreen.classList.remove("hidden");
+
+    if (isCorrect) {
+
+        resultTitle.textContent =
+            "Correta";
+
+        resultMessage.textContent =
+            "Você encontrou a constelação.";
+
+    } else {
+
+        resultTitle.textContent =
+            "Errado";
+
+        resultMessage.textContent =
+            "As conexões não correspondem à constelação.";
+
+    }
+}
+
+function continueGame() {
+
+    resultScreen.classList.add("hidden");
+
+    nextConstellation();
+}
+
+finishButton.addEventListener(
+    "click",
+    finishGame
+);  
+resetButton.addEventListener(
+    "click",
+    resetGame
+);
+continueButton.addEventListener(
+    "click",
+    continueGame
+);
