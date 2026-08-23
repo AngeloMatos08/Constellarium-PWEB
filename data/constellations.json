@@ -1,0 +1,32 @@
+{
+    "constellations": [
+        {
+            "id": "test-constellation",
+            "name": "Constelação de Teste",
+            "difficulty": 1,
+
+            "stars": [
+                {
+                    "id": 0,
+                    "x": 500,
+                    "y": 400
+                },
+                {
+                    "id": 1,
+                    "x": 700,
+                    "y": 300
+                },
+                {
+                    "id": 2,
+                    "x": 900,
+                    "y": 450
+                }
+            ],
+
+            "connections": [
+                [0, 1],
+                [1, 2]
+            ]
+        }
+    ]
+}
