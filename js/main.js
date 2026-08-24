@@ -1,8 +1,11 @@
 import { loadConstellations } from "./constellation.js";
 import { createRenderer } from "./renderer.js";
 import { validateConstellation } from "./validator.js";
-console.log("Jogo Iniciado");
+import { createGame } from "./game.js";
 
+const game = createGame();
+console.log("Jogo Iniciado");
+console.log(game.getState());
 
 // ELEMENTOS DO DOM
 const resultScreen =
@@ -18,7 +21,6 @@ const continueButton =
     document.getElementById("continue-button");
 
 // CANVAS
-
 const canvas = document.getElementById("sky");
 const ctx = canvas.getContext("2d");
 const finishButton = document.getElementById("finish-button");
@@ -27,89 +29,37 @@ const resetButton = document.getElementById("reset-button");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-
 // MUNDO
-
 const WORLD_WIDTH = 3000;
 const WORLD_HEIGHT = 2000;
 
-
 // CÂMERA
-
 const camera = {
     x: 0,
     y: 0
 };
 
-
-// ESTADO DO JOGO
-let constellations = [];
-let currentConstellation = null;
-
-let stars = [];
-let connections = []; // Conexões do jogador
-let selectedStar = null;
-let correctConnections = []; // Conexões real da constelação
+const state = game.getState();
 
 // RENDERER
-
 const renderer = createRenderer(
     ctx,
-    stars,
-    connections,
+    state,
     camera
 );
 
-
 // CONVERTER TELA → MUNDO
-
 function screenToWorld(screenX, screenY) {
-
     return {
         x: screenX + camera.x,
         y: screenY + camera.y
     };
 }
 
-
-// ADICIONAR CONEXÃO
-
-function addConnection(starA, starB) {
-
-    // Não permite conectar uma estrela nela mesma
-    if (starA === starB) {
-        return;
-    }
-
-    // Verifica se a conexão já existe
-    const alreadyConnected = connections.some(connection => {
-
-        return (
-            (connection[0] === starA && connection[1] === starB) ||
-            (connection[0] === starB && connection[1] === starA)
-        );
-
-    });
-
-    if (!alreadyConnected) {
-
-        connections.push([
-            starA,
-            starB
-        ]);
-
-    }
-}
-
-
 // CLIQUE / TOQUE NAS ESTRELAS
-
 function handlePointerDown(event) {
-
     const rect = canvas.getBoundingClientRect();
 
-    // Corrige diferença entre tamanho interno
-    // do Canvas e tamanho visual
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
@@ -119,124 +69,69 @@ function handlePointerDown(event) {
     const clickY =
         (event.clientY - rect.top) * scaleY;
 
-
-    // Converte coordenada da tela
-    // para coordenada do mundo
     const worldPosition = screenToWorld(
         clickX,
         clickY
     );
 
-
     const clickRadius = 15;
 
-
-    // Procura uma estrela próxima do clique
-    for (const star of stars) {
-
+    for (const star of state.stars) {
         const distance = Math.sqrt(
-
             (worldPosition.x - star.x) ** 2 +
             (worldPosition.y - star.y) ** 2
-
         );
 
-
         if (distance <= clickRadius) {
-
-            // Primeira estrela selecionada
-            if (selectedStar === null) {
-
-                selectedStar = star.id;
-
-            }
-
-            // Segunda estrela em diante
-            else {
-
-                addConnection(
-                    selectedStar,
-                    star.id
-                );
-
-                selectedStar = star.id;
-
-            }
-
-
-            // Atualiza o desenho
-            renderer.draw(selectedStar);
-
+            game.selectStar(star.id);
+            renderer.draw(game.getState().selectedStar);
             break;
         }
     }
 }
-
-
-// EVENTO DE CLIQUE / TOQUE
 
 canvas.addEventListener(
     "pointerdown",
     handlePointerDown
 );
 
-
 // INICIALIZAÇÃO DO JOGO
-
 async function startGame() {
-
     try {
-
-        constellations =
+        const data =
             await loadConstellations();
 
+        game.setConstellations(data);
         nextConstellation();
-
-    }
-
-    catch (error) {
-
+    } catch (error) {
         console.error(
             "Erro ao iniciar o jogo:",
             error
         );
-
     }
 }
-// INICIAR
 
 startGame();
 
-function loadConstellation(constellation) {
-
-    stars.length = 0;
-    connections.length = 0;
-
-    selectedStar = null;
-
-    stars.push(
-        ...constellation.stars
-    );
-
-    correctConnections =
-        constellation.connections;
-
-    renderer.draw(selectedStar);
-}
-
 function nextConstellation() {
+    const state =
+        game.getState();
 
     const randomIndex =
         Math.floor(
             Math.random() *
-            constellations.length
+            state.constellations.length
         );
 
-    currentConstellation =
-        constellations[randomIndex];
+    const currentConstellation =
+        state.constellations[randomIndex];
 
-    loadConstellation(
+    game.loadConstellation(
         currentConstellation
+    );
+
+    renderer.draw(
+        game.getState().selectedStar
     );
 
     console.log(
@@ -246,11 +141,13 @@ function nextConstellation() {
 }
 
 function finishGame() {
+    const state =
+        game.getState();
 
     const result =
         validateConstellation(
-            connections,
-            correctConnections
+            state.connections,
+            state.correctConnections
         );
 
     showResult(result);
@@ -258,52 +155,49 @@ function finishGame() {
 
 function resetGame() {
 
-    connections.length = 0;
+    game.reset();
 
-    selectedStar = null;
+    renderer.draw(
+        game.getState().selectedStar
+    );
 
-    renderer.draw(selectedStar);
 }
 
 function showResult(isCorrect) {
-
     resultScreen.classList.remove("hidden");
 
     if (isCorrect) {
-
         resultTitle.textContent =
             "Correta";
 
         resultMessage.textContent =
             "Você encontrou a constelação.";
-
     } else {
-
         resultTitle.textContent =
             "Errado";
 
         resultMessage.textContent =
             "As conexões não correspondem à constelação.";
-
     }
 }
 
 function continueGame() {
-
     resultScreen.classList.add("hidden");
-
     nextConstellation();
 }
 
 finishButton.addEventListener(
     "click",
     finishGame
-);  
+);
+
 resetButton.addEventListener(
     "click",
     resetGame
 );
+
 continueButton.addEventListener(
     "click",
     continueGame
 );
+
