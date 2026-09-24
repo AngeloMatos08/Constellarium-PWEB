@@ -28,9 +28,75 @@
 
 </div>
     <main id="game">
-        <button id="finish-button">Finalizar</button>
-        <button id="reset-button">Limpar</button>
-        <canvas id="sky"></canvas>
+
+        <section id="constellation-info">
+
+            <h1>Constelação da vez</h1>
+
+            <h2 id="constellation-name">
+                Órion
+            </h2>
+
+            <div id="constellation-image">
+                <!-- Futuramente entra o desenho -->
+            </div>
+
+            <p id="constellation-ra">
+                RA: 05h 35m
+            </p>
+
+            <p id="constellation-dec">
+                DEC: -05° 27'
+            </p>
+
+        </section>
+
+
+        <section id="telescope">
+
+            <canvas id="sky"></canvas>
+
+        </section>
+
+
+        <section id="controls">
+
+            <div id="ra-control">
+                <h2>RA</h2>
+
+                <button id="ra-left">↺</button>
+
+                <span id="ra-value">
+                    00h 00m
+                </span>
+
+                <button id="ra-right">↻</button>
+            </div>
+
+
+            <div id="dec-control">
+                <h2>DEC</h2>
+
+                <button id="dec-down">↺</button>
+
+                <span id="dec-value">
+                    +00° 00'
+                </span>
+
+                <button id="dec-up">↻</button>
+            </div>
+
+
+            <button id="finish-button">
+                Finalizar
+            </button>
+
+            <button id="reset-button">
+                Limpar
+            </button>
+
+        </section>
+
     </main>
 
     <script type="module" src="js/main.js"></script>

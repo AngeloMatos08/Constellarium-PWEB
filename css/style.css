@@ -1,24 +1,122 @@
-*{
-    margin: 0; padding: 0; box-sizing: border-box;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
     background-color: #050816;
     color: white;
+    font-family: Arial, sans-serif;
 }
 
 #game {
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+
+    align-items: center;
+}
+/* PAINEL DA CONSTELAÇÃO */
+
+#constellation-info {
+    height: 100%;
+
+    padding: 40px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* TELESCÓPIO */
+
+#telescope {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #sky {
     display: block;
-    width: 100%;
+
+    width: min(50vw, 600px);
+    height: min(50vw, 600px);
+
+    border: 2px solid white;
+    border-radius: 50%;
+
+    background-color: #000;
+}
+
+/* CONTROLES */
+
+#controls {
     height: 100%;
-    touch-action: none;
+
+    padding: 40px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 30px;
+}
+
+#finish-button,
+#reset-button {
+    padding: 12px 20px;
+
+    border: none;
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 16px;
 }
 
 .hidden {
     display: none;
+
+
+}
+@media (max-width: 700px) {
+
+    #game {
+        min-height: 100vh;
+
+        grid-template-columns: 1fr;
+
+        grid-template-rows: auto auto auto;
+
+        padding: 20px;
+        gap: 20px;
+    }
+
+    #constellation-info {
+        height: auto;
+
+        padding: 10px;
+
+        align-items: center;
+        text-align: center;
+    }
+
+    #telescope {
+        width: 100%;
+    }
+
+    #sky {
+        width: min(80vw, 400px);
+        height: min(80vw, 400px);
+    }
+
+    #controls {
+        height: auto;
+
+        padding: 10px;
+
+        align-items: center;
+    }
 }

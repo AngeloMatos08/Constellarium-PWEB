@@ -2,8 +2,10 @@ import { loadConstellations } from "./constellation.js";
 import { createRenderer } from "./renderer.js";
 import { validateConstellation } from "./validator.js";
 import { createGame } from "./game.js";
-
+import {createTelescope} from "./telescope.js";
 const game = createGame();
+const telescope = createTelescope();
+
 console.log("Jogo Iniciado");
 console.log(game.getState());
 
@@ -23,8 +25,105 @@ const continueButton =
 // CANVAS
 const canvas = document.getElementById("sky");
 const ctx = canvas.getContext("2d");
+
+
 const finishButton = document.getElementById("finish-button");
 const resetButton = document.getElementById("reset-button");
+
+
+// BOTÕES DE CONTROLE DO TELESCÓPIO
+const raLeftButton =
+    document.getElementById("ra-left");
+
+const raRightButton =
+    document.getElementById("ra-right");
+
+const decDownButton =
+    document.getElementById("dec-down");
+
+const decUpButton =
+    document.getElementById("dec-up");
+
+const raValue =
+    document.getElementById("ra-value");
+
+const decValue =
+    document.getElementById("dec-value");
+
+
+
+// FUNÇÃO CONVERTER MINUTOS EM HORAS/MINUTOS
+function formatRA(totalMinutes) {
+
+    const hours =
+        Math.floor(totalMinutes / 60);
+
+    const minutes =
+        totalMinutes % 60;
+
+    return `${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m`;
+}
+
+// FUNÇAO DECLINAÇÃO
+function formatDEC(degrees) {
+
+    const signal =
+        degrees >= 0 ? "+" : "-";
+
+    const absoluteDegrees =
+        Math.abs(degrees);
+
+    return `${signal}${String(absoluteDegrees).padStart(2, "0")}° 00'`;
+}
+
+// FUNCÇÃO QUE LOCALIZA A POSIÇÃO ATUAL DO TELESCOPIO
+function updateTelescopeUI() {
+
+    const position =
+        telescope.getPosition();
+
+    raValue.textContent =
+        formatRA(position.ra);
+
+    decValue.textContent =
+        formatDEC(position.dec);
+}
+
+
+// BOTÕES
+raLeftButton.addEventListener(
+    "click",
+    () => {
+        telescope.changeRA(-1);
+        updateTelescopeUI();
+    }
+);
+
+raRightButton.addEventListener(
+    "click",
+    () => {
+        telescope.changeRA(1);
+        updateTelescopeUI();
+    }
+);
+
+decDownButton.addEventListener(
+    "click",
+    () => {
+        telescope.changeDEC(-1);
+        updateTelescopeUI();
+    }
+);
+
+decUpButton.addEventListener(
+    "click",
+    () => {
+        telescope.changeDEC(1);
+        updateTelescopeUI();
+    }
+);
+
+updateTelescopeUI();
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
