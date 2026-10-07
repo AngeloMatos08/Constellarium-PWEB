@@ -76,8 +76,7 @@ export function createGame() {
 
         }
     }
-
-
+    
     function setConstellations(data) {
         constellations = data;
     }

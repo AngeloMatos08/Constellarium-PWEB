@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#07101b">
+    <meta name="description" content="Conheça a proposta educativa, a arquitetura e as tecnologias do projeto Constellarium.">
+    <title>Sobre o projeto | Constellarium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="/" aria-label="Constellarium, página inicial"><span class="brand-mark" aria-hidden="true">C</span><span>CONSTELLARIUM</span></a>
+        <nav class="site-nav" aria-label="Navegação principal">
+            <a href="/">Início</a>
+            <a href="/como-jogar">Como jogar</a>
+            <a href="/sobre" aria-current="page">Sobre o projeto</a>
+            <a class="nav-play" href="/jogo">Jogar <span aria-hidden="true">↗</span></a>
+        </nav>
+    </header>
+
+    <main class="document-page page-wrap about-page">
+        <section class="document-hero about-hero">
+            <div>
+                <p class="eyebrow"><span class="status-dot"></span> CADERNO DE PROJETO</p>
+                <h1>Programação como<br>instrumento de descoberta.</h1>
+            </div>
+            <p class="document-intro">Constellarium é um projeto educativo que aproxima astronomia e desenvolvimento web por meio de uma experiência de reconhecimento de constelações.</p>
+        </section>
+
+        <section class="about-statement">
+            <span class="statement-index">01 / PROPÓSITO</span>
+            <div><h2>Aprender fazendo.<br>Entender explorando.</h2><p>A proposta é tornar conceitos de observação celeste mais concretos: em vez de apenas ler sobre constelações, a pessoa joga com a posição das estrelas, experimenta orientar um telescópio virtual e identifica padrões conectando pontos.</p></div>
+        </section>
+
+        <section class="about-grid" aria-label="Conceitos do projeto">
+            <article class="about-topic topic-astronomy"><span class="topic-index">02 / ASTRONOMIA</span><h2>Um sistema para localizar o céu.</h2><p>Ascensão Reta (RA) e Declinação (DEC) são coordenadas usadas para descrever posições na esfera celeste. No jogo, esses conceitos inspiram os controles de orientação do telescópio.</p><div class="coordinate-pair"><span>RA <b>05h 35m</b></span><span>DEC <b>−05° 27′</b></span></div></article>
+            <article class="about-topic topic-code"><span class="topic-index">03 / PROGRAMAÇÃO</span><h2>Peças pequenas, responsabilidades claras.</h2><p>O projeto usa JavaScript em módulos ES. Estado do jogo, telescópio, desenho e validação ficam separados para que cada parte possa evoluir sem concentrar tudo em um único arquivo.</p><div class="module-list"><code>game.js</code><code>renderer.js</code><code>validator.js</code></div></article>
+        </section>
+
+        <section class="architecture-section" aria-labelledby="architecture-title">
+            <div class="architecture-heading"><span class="topic-index">04 / COMO FOI CONSTRUÍDO</span><h2 id="architecture-title">Uma arquitetura em órbita.</h2><p>HTML organiza as telas, CSS estabelece a identidade visual e JavaScript conduz as interações. O Canvas desenha o campo de estrelas; os dados locais em JSON alimentam os desafios do protótipo.</p></div>
+            <div class="architecture-map" aria-label="Fluxo dos módulos do jogo">
+                <div class="architecture-node node-data"><span>01</span><b>Dados JSON</b><small>constelações</small></div>
+                <span class="architecture-connector" aria-hidden="true">→</span>
+                <div class="architecture-node node-game"><span>02</span><b>Estado do jogo</b><small>game.js</small></div>
+                <span class="architecture-connector" aria-hidden="true">→</span>
+                <div class="architecture-node node-canvas"><span>03</span><b>Canvas</b><small>renderer.js</small></div>
+                <span class="architecture-connector" aria-hidden="true">→</span>
+                <div class="architecture-node node-check"><span>04</span><b>Verificação</b><small>validator.js</small></div>
+            </div>
+            <p class="architecture-note"><span class="status-dot status-dot-muted"></span> A projeção astronômica está em desenvolvimento e permanece separada do fluxo atual do jogo.</p>
+        </section>
+
+        <section class="project-notes" aria-labelledby="notes-title">
+            <div><span class="topic-index">05 / PRÓXIMOS REGISTROS</span><h2 id="notes-title">Um projeto em evolução.</h2><p>Este espaço pode acompanhar as escolhas técnicas e científicas à medida que o Constellarium cresce.</p></div>
+            <ul>
+                <li><span>01</span> Fontes e referências astronômicas <em>Em preparação</em></li>
+                <li><span>02</span> Decisões de desenvolvimento <em>Em preparação</em></li>
+                <li><span>03</span> Histórico de evolução <em>Em preparação</em></li>
+                <li><span>04</span> Exploração astronômica futura <em>Em preparação</em></li>
+            </ul>
+        </section>
+
+        <section class="document-cta"><div><p class="eyebrow">DA IDEIA À OBSERVAÇÃO</p><h2>Explore uma constelação.</h2></div><a class="button button-primary" href="/jogo">Abrir o jogo <span aria-hidden="true">↗</span></a></section>
+    </main>
+
+    <footer class="site-footer page-wrap">
+        <a class="brand brand-footer" href="/"><span class="brand-mark" aria-hidden="true">C</span><span>CONSTELLARIUM</span></a>
+        <span>Um projeto educativo de astronomia.</span>
+        <a href="/como-jogar">Como jogar <span aria-hidden="true">↗</span></a>
+    </footer>
+</body>
+</html>

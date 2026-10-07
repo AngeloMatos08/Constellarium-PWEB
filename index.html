@@ -1,38 +1,102 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Constellarium</title>
-    <link rel="stylesheet" href="css/style.css">
+    <meta name="theme-color" content="#07101b">
+    <meta name="description" content="Explore o céu noturno e descubra constelações com o Constellarium, um jogo educativo de astronomia.">
+    <title>Constellarium | Explore o céu, conecte as estrelas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/site.css">
 </head>
-
 <body>
-    <div id="result-screen" class="hidden">
+    <header class="site-header">
+        <a class="brand" href="/" aria-label="Constellarium, página inicial">
+            <span class="brand-mark" aria-hidden="true">C</span>
+            <span>CONSTELLARIUM</span>
+        </a>
+        <nav class="site-nav" aria-label="Navegação principal">
+            <a href="/" aria-current="page">Início</a>
+            <a href="/como-jogar">Como jogar</a>
+            <a href="/sobre">Sobre o projeto</a>
+            <a class="nav-play" href="/jogo">Jogar <span aria-hidden="true">↗</span></a>
+        </nav>
+    </header>
 
-    <div class="result-card">
+    <main>
+        <section class="home-hero page-wrap">
+            <div class="hero-copy">
+                <p class="eyebrow"><span class="status-dot"></span> ASTRONOMIA PARA EXPLORAR</p>
+                <h1>Constellarium<span class="title-period">.</span></h1>
+                <p class="hero-lede">O céu está cheio de histórias. Ajuste o telescópio, encontre as estrelas e desenhe constelações com as próprias mãos.</p>
+                <div class="hero-actions">
+                    <a class="button button-primary" href="/jogo">Começar a jogar <span aria-hidden="true">↗</span></a>
+                    <a class="text-link" href="/como-jogar">Descobrir como funciona <span aria-hidden="true">→</span></a>
+                </div>
+                <div class="hero-meta">
+                    <span>UM JOGO EDUCATIVO</span>
+                    <span class="meta-rule"></span>
+                    <span>FEITO PARA OLHAR MAIS DE PERTO</span>
+                </div>
+            </div>
 
-        <h1 id="result-title">
-            Acertou!
-        </h1>
+            <figure class="sky-figure">
+                <div class="chart-topline">
+                    <span>MAPA DO CÉU</span>
+                    <span class="chart-coordinates">05h 35m <i>/</i> −05° 27′</span>
+                </div>
+                <div class="chart-window">
+                    <canvas class="sky-chart" data-sky-chart aria-label="Mapa ilustrativo de estrelas ligadas em uma constelação"></canvas>
+                    <span class="chart-label chart-label-one">BETELGEUSE</span>
+                    <span class="chart-label chart-label-two">RIGEL</span>
+                    <span class="chart-crosshair" aria-hidden="true"></span>
+                </div>
+                <figcaption>
+                    <span><i class="legend-star"></i> ESTRELAS VISÍVEIS</span>
+                    <span><i class="legend-line"></i> PADRÃO A DESCOBRIR</span>
+                </figcaption>
+            </figure>
+        </section>
 
-        <p id="result-message">
-            Você encontrou a constelação.
-        </p>
+        <section class="home-intro page-wrap" aria-labelledby="home-intro-title">
+            <div class="section-heading">
+                <p class="eyebrow">OBSERVAR. ORIENTAR. CONECTAR.</p>
+                <h2 id="home-intro-title">Uma nova forma de<br>aprender a olhar para cima.</h2>
+            </div>
+            <div class="intro-copy">
+                <p>Constellarium transforma o reconhecimento de constelações em uma pequena jornada de exploração. Você recebe um desafio, aponta o telescópio virtual e procura no campo de visão as estrelas que formam cada desenho.</p>
+                <a class="text-link" href="/sobre">Conheça o projeto <span aria-hidden="true">→</span></a>
+            </div>
+        </section>
 
-        <button id="continue-button">
-            Continuar
-        </button>
-
-    </div>
-
-</div>
-    <main id="game">
-        <button id="finish-button">Finalizar</button>
-        <button id="reset-button">Limpar</button>
-        <canvas id="sky"></canvas>
+        <section class="home-route" aria-label="Etapas da exploração">
+            <div class="route-inner page-wrap">
+                <article class="route-step">
+                    <span class="step-index">01</span>
+                    <div><h3>Receba um alvo</h3><p>Uma constelação vira o seu próximo ponto de exploração.</p></div>
+                    <span class="step-glyph" aria-hidden="true">✳</span>
+                </article>
+                <article class="route-step">
+                    <span class="step-index">02</span>
+                    <div><h3>Oriente o telescópio</h3><p>Explore o céu ajustando ascensão reta e declinação.</p></div>
+                    <span class="step-glyph step-glyph-compass" aria-hidden="true">⌖</span>
+                </article>
+                <article class="route-step">
+                    <span class="step-index">03</span>
+                    <div><h3>Ligue as estrelas</h3><p>Reconheça o padrão e confira suas conexões.</p></div>
+                    <span class="step-glyph" aria-hidden="true">✧</span>
+                </article>
+            </div>
+        </section>
     </main>
 
-    <script type="module" src="js/main.js"></script>
+    <footer class="site-footer page-wrap">
+        <a class="brand brand-footer" href="/"><span class="brand-mark" aria-hidden="true">C</span><span>CONSTELLARIUM</span></a>
+        <span>Um projeto educativo de astronomia.</span>
+        <a href="/sobre">Sobre o projeto <span aria-hidden="true">↗</span></a>
+    </footer>
+    <script type="module" src="js/home.js"></script>
 </body>
 </html>
