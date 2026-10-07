@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#07101b">
+    <title>Jogar | Constellarium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/site.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="game-page">
+    <header class="site-header">
+        <a class="brand" href="/" aria-label="Constellarium, página inicial">
+            <span class="brand-mark" aria-hidden="true">C</span>
+            <span>CONSTELLARIUM</span>
+        </a>
+        <nav class="site-nav" aria-label="Navegação principal">
+            <a href="/">Início</a>
+            <a href="/como-jogar">Como jogar</a>
+            <a href="/sobre">Sobre o projeto</a>
+            <a class="nav-play" href="/jogo" aria-current="page">Jogar <span aria-hidden="true">↗</span></a>
+        </nav>
+    </header>
+
+    <div id="result-screen" class="hidden" role="dialog" aria-modal="true" aria-labelledby="result-title">
+        <div class="result-card">
+            <h1 id="result-title">Acertou!</h1>
+            <p id="result-message">Você encontrou a constelação.</p>
+            <button id="continue-button" type="button">Continuar</button>
+        </div>
+    </div>
+
+    <main id="game">
+        <section id="constellation-info" aria-labelledby="constellation-heading">
+            <p class="game-kicker">MISSÃO ATUAL</p>
+            <h1 id="constellation-heading">Constelação da vez</h1>
+            <h2 id="constellation-name">Órion</h2>
+            <div id="constellation-image" aria-hidden="true"></div>
+            <p id="constellation-ra">RA: 05h 35m</p>
+            <p id="constellation-dec">DEC: -05° 27′</p>
+        </section>
+
+        <section id="telescope" aria-label="Campo de visão do telescópio">
+            <canvas id="sky" aria-label="Mapa de estrelas. Selecione duas estrelas para conectá-las."></canvas>
+        </section>
+
+        <section id="controls" aria-label="Controles do telescópio e da partida">
+            <div id="ra-control">
+                <h2>RA</h2>
+                <button id="ra-left" type="button" aria-label="Mover ascensão reta para a esquerda">↺</button>
+                <span id="ra-value">00h 00m</span>
+                <button id="ra-right" type="button" aria-label="Mover ascensão reta para a direita">↻</button>
+            </div>
+            <div id="dec-control">
+                <h2>DEC</h2>
+                <button id="dec-down" type="button" aria-label="Diminuir declinação">↺</button>
+                <span id="dec-value">+00° 00′</span>
+                <button id="dec-up" type="button" aria-label="Aumentar declinação">↻</button>
+            </div>
+            <button id="finish-button" type="button">Finalizar tentativa</button>
+            <button id="reset-button" type="button">Limpar conexões</button>
+        </section>
+    </main>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
