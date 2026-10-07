@@ -3,7 +3,7 @@
   <img src="https://img.shields.io/github/languages/count/AngeloMatos08/Constellarium-PWEB?style=for-the-badge" alt="Quantidade de linguagens">
   <img src="https://img.shields.io/github/languages/top/AngeloMatos08/Constellarium-PWEB?style=for-the-badge" alt="Linguagem principal">
   <img src="https://img.shields.io/github/last-commit/AngeloMatos08/Constellarium-PWEB?style=for-the-badge" alt="Último commit">
-
+![GitHub commit activity](https://img.shields.io/github/commit-activity/t/AngeloMatos08/MasterHand-IFCE-Foundation?style=for-the-badge)
 <h1 align="center">Constellarium</h1>
 
 <p align="center">
