@@ -1,6 +1,6 @@
-export function createRenderer(ctx, state, camera) {
+export function createRenderer(ctx, state) {
 
-    function draw(selectedStar) {
+    function draw(projectedPositions, selectedStar) {
 
         // LIMPAR O CANVAS
 
@@ -21,43 +21,32 @@ export function createRenderer(ctx, state, camera) {
 
         for (const connection of state.connections) {
 
-            const star1 =
-                state.stars.find(
-                    star => star.id === connection[0]
-                );
+            const position1 =
+                projectedPositions.get(connection[0]);
 
-            const star2 =
-                state.stars.find(
-                    star => star.id === connection[1]
-                );
+            const position2 =
+                projectedPositions.get(connection[1]);
 
-
-            // Verifica se as duas estrelas existem
-            if (star1 && star2) {
-
-                const x1 =
-                    star1.x - camera.x;
-
-                const y1 =
-                    star1.y - camera.y;
-
-                const x2 =
-                    star2.x - camera.x;
-
-                const y2 =
-                    star2.y - camera.y;
+            if (
+                position1?.visible &&
+                position2?.visible &&
+                Number.isFinite(position1.x) &&
+                Number.isFinite(position1.y) &&
+                Number.isFinite(position2.x) &&
+                Number.isFinite(position2.y)
+            ) {
 
 
                 ctx.beginPath();
 
                 ctx.moveTo(
-                    x1,
-                    y1
+                    position1.x,
+                    position1.y
                 );
 
                 ctx.lineTo(
-                    x2,
-                    y2
+                    position2.x,
+                    position2.y
                 );
 
                 ctx.stroke();
@@ -69,11 +58,16 @@ export function createRenderer(ctx, state, camera) {
 
         for (const star of state.stars) {
 
-            const screenX =
-                star.x - camera.x;
+            const position =
+                projectedPositions.get(star.id);
 
-            const screenY =
-                star.y - camera.y;
+            if (
+                !position?.visible ||
+                !Number.isFinite(position.x) ||
+                !Number.isFinite(position.y)
+            ) {
+                continue;
+            }
 
 
             // COR DA ESTRELA
@@ -94,8 +88,8 @@ export function createRenderer(ctx, state, camera) {
             ctx.beginPath();
 
             ctx.arc(
-                screenX,
-                screenY,
+                position.x,
+                position.y,
                 5,
                 0,
                 Math.PI * 2
@@ -111,8 +105,8 @@ export function createRenderer(ctx, state, camera) {
                 ctx.beginPath();
 
                 ctx.arc(
-                    screenX,
-                    screenY,
+                    position.x,
+                    position.y,
                     10,
                     0,
                     Math.PI * 2

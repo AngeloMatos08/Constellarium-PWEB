@@ -1,8 +1,9 @@
 import { loadConstellations } from "./constellation.js";
 import { createRenderer } from "./renderer.js";
+import { projectStar } from "./projection.js";
 import { validateConstellation } from "./validator.js";
 import { createGame } from "./game.js";
-import {createTelescope} from "./telescope.js";
+import { createTelescope } from "./telescope.js";
 const game = createGame();
 const telescope = createTelescope();
 
@@ -96,6 +97,7 @@ raLeftButton.addEventListener(
     () => {
         telescope.changeRA(-1);
         updateTelescopeUI();
+        drawGame();
     }
 );
 
@@ -104,6 +106,7 @@ raRightButton.addEventListener(
     () => {
         telescope.changeRA(1);
         updateTelescopeUI();
+        drawGame();
     }
 );
 
@@ -112,6 +115,7 @@ decDownButton.addEventListener(
     () => {
         telescope.changeDEC(-1);
         updateTelescopeUI();
+        drawGame();
     }
 );
 
@@ -120,70 +124,117 @@ decUpButton.addEventListener(
     () => {
         telescope.changeDEC(1);
         updateTelescopeUI();
+        drawGame();
     }
 );
 
 updateTelescopeUI();
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-// MUNDO
-const WORLD_WIDTH = 3000;
-const WORLD_HEIGHT = 2000;
-
-// CÂMERA
-const camera = {
-    x: 0,
-    y: 0
-};
-
 const state = game.getState();
+const renderer = createRenderer(ctx, state);
+const projectedPositions = new Map();
+let logicalWidth = 1;
+let logicalHeight = 1;
 
-// RENDERER
-const renderer = createRenderer(
-    ctx,
-    state,
-    camera
-);
+function drawGame() {
+    projectedPositions.clear();
 
-// CONVERTER TELA → MUNDO
-function screenToWorld(screenX, screenY) {
-    return {
-        x: screenX + camera.x,
-        y: screenY + camera.y
-    };
+    const telescopePosition = telescope.getPosition();
+
+    for (const star of state.stars) {
+        projectedPositions.set(
+            star.id,
+            projectStar(
+                star,
+                telescopePosition,
+                logicalWidth,
+                logicalHeight
+            )
+        );
+    }
+
+    renderer.draw(
+        projectedPositions,
+        game.getState().selectedStar
+    );
+}
+
+function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    const styles = getComputedStyle(canvas);
+    const borderLeft = parseFloat(styles.borderLeftWidth) || 0;
+    const borderRight = parseFloat(styles.borderRightWidth) || 0;
+    const borderTop = parseFloat(styles.borderTopWidth) || 0;
+    const borderBottom = parseFloat(styles.borderBottomWidth) || 0;
+    const contentWidth = rect.width - borderLeft - borderRight;
+    const contentHeight = rect.height - borderTop - borderBottom;
+
+    const logicalSize = Math.max(
+        1,
+        Math.round(Math.min(contentWidth, contentHeight))
+    );
+    logicalWidth = logicalSize;
+    logicalHeight = logicalSize;
+
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    const bitmapSize = Math.round(logicalSize * pixelRatio);
+
+    if (canvas.width !== bitmapSize || canvas.height !== bitmapSize) {
+        canvas.width = bitmapSize;
+        canvas.height = bitmapSize;
+    }
+
+    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    drawGame();
 }
 
 // CLIQUE / TOQUE NAS ESTRELAS
 function handlePointerDown(event) {
     const rect = canvas.getBoundingClientRect();
+    const styles = getComputedStyle(canvas);
+    const borderLeft = parseFloat(styles.borderLeftWidth) || 0;
+    const borderRight = parseFloat(styles.borderRightWidth) || 0;
+    const borderTop = parseFloat(styles.borderTopWidth) || 0;
+    const borderBottom = parseFloat(styles.borderBottomWidth) || 0;
+    const contentWidth = rect.width - borderLeft - borderRight;
+    const contentHeight = rect.height - borderTop - borderBottom;
+    const localX = event.clientX - rect.left - borderLeft;
+    const localY = event.clientY - rect.top - borderTop;
 
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
+    if (
+        localX < 0 || localX > contentWidth ||
+        localY < 0 || localY > contentHeight
+    ) {
+        return;
+    }
 
-    const clickX =
-        (event.clientX - rect.left) * scaleX;
-
-    const clickY =
-        (event.clientY - rect.top) * scaleY;
-
-    const worldPosition = screenToWorld(
-        clickX,
-        clickY
-    );
+    const clickX = localX * logicalWidth / contentWidth;
+    const clickY = localY * logicalHeight / contentHeight;
 
     const clickRadius = 15;
 
     for (const star of state.stars) {
+        const position = projectedPositions.get(star.id);
+
+        if (
+            !position?.visible ||
+            !Number.isFinite(position.x) ||
+            !Number.isFinite(position.y)
+        ) {
+            continue;
+        }
+
         const distance = Math.sqrt(
-            (worldPosition.x - star.x) ** 2 +
-            (worldPosition.y - star.y) ** 2
+            (clickX - position.x) ** 2 +
+            (clickY - position.y) ** 2
         );
 
         if (distance <= clickRadius) {
             game.selectStar(star.id);
-            renderer.draw(game.getState().selectedStar);
+            renderer.draw(
+                projectedPositions,
+                game.getState().selectedStar
+            );
             break;
         }
     }
@@ -193,6 +244,9 @@ canvas.addEventListener(
     "pointerdown",
     handlePointerDown
 );
+
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
 // INICIALIZAÇÃO DO JOGO
 async function startGame() {
@@ -229,9 +283,7 @@ function nextConstellation() {
         currentConstellation
     );
 
-    renderer.draw(
-        game.getState().selectedStar
-    );
+    drawGame();
 
     console.log(
         "Nova constelação:",
@@ -256,9 +308,7 @@ function resetGame() {
 
     game.reset();
 
-    renderer.draw(
-        game.getState().selectedStar
-    );
+    drawGame();
 
 }
 

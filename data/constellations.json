@@ -1,62 +1,58 @@
+
 {
     "constellations": [
         {
             "id": "test-constellation",
             "name": "Constelação de Teste",
             "difficulty": 1,
-
             "stars": [
                 {
                     "id": 0,
-                    "x": 500,
-                    "y": 400
+                    "ra": 0,
+                    "dec": 0
                 },
                 {
                     "id": 1,
-                    "x": 700,
-                    "y": 300
+                    "ra": 0.05,
+                    "dec": 1
                 },
                 {
                     "id": 2,
-                    "x": 900,
-                    "y": 450
+                    "ra": 23.95,
+                    "dec": -1
                 }
             ],
-
             "connections": [
                 [0, 1],
                 [1, 2]
             ]
         },
-
         {
             "id": "second-constellation",
             "name": "Segunda Constelação",
             "difficulty": 2,
-
             "stars": [
                 {
                     "id": 0,
-                    "x": 500,
-                    "y": 308
+                    "ra": 0,
+                    "dec": 0
                 },
                 {
                     "id": 1,
-                    "x": 700,
-                    "y": 408
+                    "ra": 0.1,
+                    "dec": 1
                 },
                 {
                     "id": 2,
-                    "x": 900,
-                    "y": 308
+                    "ra": 0.2,
+                    "dec": 0
                 },
                 {
                     "id": 3,
-                    "x": 800,
-                    "y": 508
+                    "ra": 0.15,
+                    "dec": -2
                 }
             ],
-
             "connections": [
                 [0, 1],
                 [1, 2],
