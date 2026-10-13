@@ -11,6 +11,7 @@ app.disable("x-powered-by");
 app.use("/css", express.static(path.join(rootDirectory, "css")));
 app.use("/js", express.static(path.join(rootDirectory, "js")));
 app.use("/data", express.static(path.join(rootDirectory, "data")));
+app.use("/assets", express.static(path.join(rootDirectory, "assets")));
 app.use("/", pagesRouter);
 
 app.use((request, response) => {

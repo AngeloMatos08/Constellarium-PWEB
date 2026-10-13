@@ -38,13 +38,28 @@
             <p class="game-kicker">MISSÃO ATUAL</p>
             <h1 id="constellation-heading">Constelação da vez</h1>
             <h2 id="constellation-name">Órion</h2>
-            <div id="constellation-image" aria-hidden="true"></div>
-            <p id="constellation-ra">RA: 05h 35m</p>
-            <p id="constellation-dec">DEC: -05° 27′</p>
+            <section id="reference-panel" aria-label="Painel de referência da constelação">
+                <p class="panel-label">DESENHO DE REFERÊNCIA</p>
+                <svg id="constellation-diagram" role="img" aria-label="Desenho de referência da constelação"></svg>
+
+                <div class="reference-details">
+                    <h3>Informações astronômicas</h3>
+                    <p id="constellation-ra">RA central: não informada</p>
+                    <p id="constellation-dec">DEC central: não informada</p>
+                </div>
+
+                <div class="reference-curiosities">
+                    <h3>Curiosidades</h3>
+                    <p id="constellation-curiosities">Ainda não há curiosidades cadastradas.</p>
+                </div>
+            </section>
         </section>
 
         <section id="telescope" aria-label="Campo de visão do telescópio">
-            <canvas id="sky" aria-label="Mapa de estrelas. Selecione duas estrelas para conectá-las."></canvas>
+            <div class="telescope-optics">
+                <canvas id="sky" aria-label="Mapa de estrelas. Selecione duas estrelas para conectá-las."></canvas>
+                <div class="telescope-frame" aria-hidden="true"></div>
+            </div>
         </section>
 
         <section id="controls" aria-label="Controles do telescópio e da partida">

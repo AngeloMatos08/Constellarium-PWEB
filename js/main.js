@@ -1,5 +1,6 @@
 import { loadConstellations } from "./constellation.js";
 import { createRenderer } from "./renderer.js";
+import { createReferenceRenderer } from "./reference-renderer.js";
 import { projectStar } from "./projection.js";
 import { validateConstellation } from "./validator.js";
 import { createGame } from "./game.js";
@@ -22,6 +23,10 @@ const resultMessage =
 
 const continueButton =
     document.getElementById("continue-button");
+const constellationName =
+    document.getElementById("constellation-name");
+const referenceDiagram =
+    document.getElementById("constellation-diagram");
 
 // CANVAS
 const canvas = document.getElementById("sky");
@@ -132,6 +137,7 @@ updateTelescopeUI();
 
 const state = game.getState();
 const renderer = createRenderer(ctx, state);
+const referenceRenderer = createReferenceRenderer(referenceDiagram);
 const projectedPositions = new Map();
 let logicalWidth = 1;
 let logicalHeight = 1;
@@ -283,6 +289,8 @@ function nextConstellation() {
         currentConstellation
     );
 
+    constellationName.textContent = currentConstellation.name;
+    referenceRenderer.render(currentConstellation);
     drawGame();
 
     console.log(
