@@ -1,0 +1,233 @@
+
+{
+  "constellations": [
+    {
+      "id": "orion",
+      "name": "Órion",
+      "difficulty": 1,
+      "center": {
+        "ra": 5.585639,
+        "dec": 0.299167
+      },
+      "stars": [
+        {
+          "id": "meissa",
+          "diagram": { "x": 0.5, "y": 0.08 }
+        },
+        {
+          "id": "betelgeuse",
+          "diagram": { "x": 0.25, "y": 0.25 }
+        },
+        {
+          "id": "bellatrix",
+          "diagram": { "x": 0.75, "y": 0.28 }
+        },
+        {
+          "id": "mintaka",
+          "diagram": { "x": 0.65, "y": 0.53 }
+        },
+        {
+          "id": "alnilam",
+          "diagram": { "x": 0.51, "y": 0.57 }
+        },
+        {
+          "id": "alnitak",
+          "diagram": { "x": 0.37, "y": 0.61 }
+        },
+        {
+          "id": "saiph",
+          "diagram": { "x": 0.25, "y": 0.88 }
+        },
+        {
+          "id": "rigel",
+          "diagram": { "x": 0.77, "y": 0.85 }
+        }
+      ],
+      "connections": [
+        ["betelgeuse", "meissa"],
+        ["meissa", "bellatrix"],
+        ["bellatrix", "mintaka"],
+        ["mintaka", "alnilam"],
+        ["alnilam", "alnitak"],
+        ["alnitak", "saiph"],
+        ["saiph", "rigel"],
+        ["rigel", "mintaka"],
+        ["betelgeuse", "alnitak"]
+      ]
+    },
+    {
+      "id": "cassiopeia",
+      "name": "Cassiopeia",
+      "difficulty": 2,
+      "center": {
+        "ra": 1.0,
+        "dec": 60.0
+      },
+      "stars": [
+        {
+          "id": "caph",
+          "diagram": { "x": 0.08, "y": 0.35 }
+        },
+        {
+          "id": "schedar",
+          "diagram": { "x": 0.28, "y": 0.68 }
+        },
+        {
+          "id": "gamma-cassiopeiae",
+          "diagram": { "x": 0.50, "y": 0.35 }
+        },
+        {
+          "id": "ruchbah",
+          "diagram": { "x": 0.72, "y": 0.68 }
+        },
+        {
+          "id": "egin",
+          "diagram": { "x": 0.92, "y": 0.35 }
+        }
+      ],
+      "connections": [
+        ["caph", "schedar"],
+        ["schedar", "gamma-cassiopeiae"],
+        ["gamma-cassiopeiae", "ruchbah"],
+        ["ruchbah", "egin"]
+      ]
+    },
+    {
+      "id": "ursa-major",
+      "name": "Ursa Major",
+      "difficulty": 3,
+      "center": {
+        "ra": 12.2,
+        "dec": 55.5
+      },
+      "stars": [
+        {
+          "id": "dubhe",
+          "diagram": { "x": 0.15, "y": 0.20 }
+        },
+        {
+          "id": "merak",
+          "diagram": { "x": 0.15, "y": 0.55 }
+        },
+        {
+          "id": "phecda",
+          "diagram": { "x": 0.48, "y": 0.68 }
+        },
+        {
+          "id": "megrez",
+          "diagram": { "x": 0.48, "y": 0.32 }
+        },
+        {
+          "id": "alioth",
+          "diagram": { "x": 0.72, "y": 0.32 }
+        },
+        {
+          "id": "mizar",
+          "diagram": { "x": 0.85, "y": 0.48 }
+        },
+        {
+          "id": "alkaid",
+          "diagram": { "x": 0.96, "y": 0.68 }
+        }
+      ],
+      "connections": [
+        ["dubhe", "merak"],
+        ["merak", "phecda"],
+        ["phecda", "megrez"],
+        ["megrez", "dubhe"],
+        ["megrez", "alioth"],
+        ["alioth", "mizar"],
+        ["mizar", "alkaid"]
+      ]
+    },
+    {
+      "id": "cruzeiro-do-sul",
+      "name": "Cruzeiro do Sul",
+      "difficulty": 2,
+      "center": {
+        "ra": 12.5,
+        "dec": -60.0
+      },
+      "stars": [
+        {
+          "id": "gacrux",
+          "diagram": { "x": 0.50, "y": 0.10 }
+        },
+        {
+          "id": "acrux",
+          "diagram": { "x": 0.50, "y": 0.90 }
+        },
+        {
+          "id": "mimosa",
+          "diagram": { "x": 0.15, "y": 0.48 }
+        },
+        {
+          "id": "delta-crucis",
+          "diagram": { "x": 0.85, "y": 0.48 }
+        },
+        {
+          "id": "epsilon-crucis",
+          "diagram": { "x": 0.50, "y": 0.58 }
+        }
+      ],
+      "connections": [
+        ["gacrux", "epsilon-crucis"],
+        ["epsilon-crucis", "acrux"],
+        ["mimosa", "epsilon-crucis"],
+        ["epsilon-crucis", "delta-crucis"]
+      ]
+    },
+    {
+      "id": "scorpius",
+      "name": "Scorpius",
+      "difficulty": 3,
+      "center": {
+        "ra": 16.8,
+        "dec": -30.0
+      },
+      "stars": [
+        {
+          "id": "graffias",
+          "diagram": { "x": 0.28, "y": 0.10 }
+        },
+        {
+          "id": "dschubba",
+          "diagram": { "x": 0.42, "y": 0.25 }
+        },
+        {
+          "id": "pi-scorpii",
+          "diagram": { "x": 0.50, "y": 0.43 }
+        },
+        {
+          "id": "antares",
+          "diagram": { "x": 0.60, "y": 0.58 }
+        },
+        {
+          "id": "epsilon-scorpii",
+          "diagram": { "x": 0.78, "y": 0.65 }
+        },
+        {
+          "id": "sargas",
+          "diagram": { "x": 0.88, "y": 0.85 }
+        },
+        {
+          "id": "shaula",
+          "diagram": { "x": 0.68, "y": 0.92 }
+        },
+        {
+          "id": "lesath",
+          "diagram": { "x": 0.55, "y": 0.88 }
+        }
+      ],
+      "connections": [
+        ["graffias", "dschubba"],
+        ["dschubba", "pi-scorpii"],
+        ["pi-scorpii", "antares"],
+        ["antares", "epsilon-scorpii"],
+        ["epsilon-scorpii", "sargas"],
+        ["sargas", "shaula"],
+        ["shaula", "lesath"]
+      ]
+    }
+  ]
+}

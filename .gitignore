@@ -1,3 +1,5 @@
 node_modules/
 .DS_Store
 .env
+# Credenciais Firebase
+config/firebase/serviceAccountKey.json

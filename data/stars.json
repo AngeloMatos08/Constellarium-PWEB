@@ -1,0 +1,269 @@
+
+{
+  "stars": [
+    {
+      "id": "meissa",
+      "name": "Meissa",
+      "ra": 5.585639,
+      "dec": 9.934167,
+      "magnitude": 3.3,
+      "color": "#c7ddff"
+    },
+    {
+      "id": "betelgeuse",
+      "name": "Betelgeuse",
+      "ra": 5.919528,
+      "dec": 7.406944,
+      "magnitude": 0.5,
+      "color": "#ffad80"
+    },
+    {
+      "id": "bellatrix",
+      "name": "Bellatrix",
+      "ra": 5.418851,
+      "dec": 6.349722,
+      "magnitude": 1.6,
+      "color": "#c4d9ff"
+    },
+    {
+      "id": "mintaka",
+      "name": "Mintaka",
+      "ra": 5.533444,
+      "dec": -0.299167,
+      "magnitude": 2.2,
+      "color": "#c4d9ff"
+    },
+    {
+      "id": "alnilam",
+      "name": "Alnilam",
+      "ra": 5.603559,
+      "dec": -1.201917,
+      "magnitude": 1.7,
+      "color": "#b9d3ff"
+    },
+    {
+      "id": "alnitak",
+      "name": "Alnitak",
+      "ra": 5.679313,
+      "dec": -1.942572,
+      "magnitude": 1.8,
+      "color": "#b9d3ff"
+    },
+    {
+      "id": "saiph",
+      "name": "Saiph",
+      "ra": 5.795939,
+      "dec": -9.669722,
+      "magnitude": 2.1,
+      "color": "#c4d9ff"
+    },
+    {
+      "id": "rigel",
+      "name": "Rigel",
+      "ra": 5.242298,
+      "dec": -8.201639,
+      "magnitude": 0.1,
+      "color": "#a9c9ff"
+    },
+    {
+      "id": "schedar",
+      "name": "Schedar",
+      "ra": 0.675123,
+      "dec": 56.537331,
+      "magnitude": 2.2,
+      "color": "#ffccaa"
+    },
+    {
+      "id": "caph",
+      "name": "Caph",
+      "ra": 0.152964,
+      "dec": 59.149780,
+      "magnitude": 2.3,
+      "color": "#fff0d0"
+    },
+    {
+      "id": "gamma-cassiopeiae",
+      "name": "Gamma Cassiopeiae",
+      "ra": 0.945139,
+      "dec": 60.716667,
+      "magnitude": 2.5,
+      "color": "#b9d3ff"
+    },
+    {
+      "id": "ruchbah",
+      "name": "Ruchbah",
+      "ra": 1.430278,
+      "dec": 60.235278,
+      "magnitude": 2.7,
+      "color": "#d9e5ff"
+    },
+    {
+      "id": "egin",
+      "name": "Segin",
+      "ra": 1.906590,
+      "dec": 63.670000,
+      "magnitude": 3.4,
+      "color": "#d9e5ff"
+    },
+    {
+      "id": "dubhe",
+      "name": "Dubhe",
+      "ra": 11.062100,
+      "dec": 61.750800,
+      "magnitude": 1.8,
+      "color": "#ffccaa"
+    },
+    {
+      "id": "merak",
+      "name": "Merak",
+      "ra": 11.030700,
+      "dec": 56.382400,
+      "magnitude": 2.4,
+      "color": "#d9e5ff"
+    },
+    {
+      "id": "phecda",
+      "name": "Phecda",
+      "ra": 11.897200,
+      "dec": 53.694800,
+      "magnitude": 2.4,
+      "color": "#d9e5ff"
+    },
+    {
+      "id": "megrez",
+      "name": "Megrez",
+      "ra": 12.257100,
+      "dec": 57.032600,
+      "magnitude": 3.3,
+      "color": "#d9e5ff"
+    },
+    {
+      "id": "alioth",
+      "name": "Alioth",
+      "ra": 12.900500,
+      "dec": 55.959800,
+      "magnitude": 1.8,
+      "color": "#d9e5ff"
+    },
+    {
+      "id": "mizar",
+      "name": "Mizar",
+      "ra": 13.398700,
+      "dec": 54.925400,
+      "magnitude": 2.2,
+      "color": "#d9e5ff"
+    },
+    {
+      "id": "alkaid",
+      "name": "Alkaid",
+      "ra": 13.792300,
+      "dec": 49.313300,
+      "magnitude": 1.9,
+      "color": "#b9d3ff"
+    },
+    {
+      "id": "acrux",
+      "name": "Acrux",
+      "ra": 12.443300,
+      "dec": -63.099100,
+      "magnitude": 0.8,
+      "color": "#b9d3ff"
+    },
+    {
+      "id": "mimosa",
+      "name": "Mimosa",
+      "ra": 12.795300,
+      "dec": -59.688800,
+      "magnitude": 1.3,
+      "color": "#b9d3ff"
+    },
+    {
+      "id": "gacrux",
+      "name": "Gacrux",
+      "ra": 12.519400,
+      "dec": -57.113200,
+      "magnitude": 1.6,
+      "color": "#ffad80"
+    },
+    {
+      "id": "delta-crucis",
+      "name": "Delta Crucis",
+      "ra": 12.252400,
+      "dec": -58.748900,
+      "magnitude": 2.8,
+      "color": "#b9d3ff"
+    },
+    {
+      "id": "epsilon-crucis",
+      "name": "Epsilon Crucis",
+      "ra": 12.356000,
+      "dec": -60.401100,
+      "magnitude": 3.6,
+      "color": "#ffccaa"
+    },
+    {
+      "id": "dschubba",
+      "name": "Dschubba",
+      "ra": 16.005600,
+      "dec": -22.621700,
+      "magnitude": 2.3,
+      "color": "#b9d3ff"
+    },
+    {
+      "id": "graffias",
+      "name": "Graffias",
+      "ra": 16.090600,
+      "dec": -19.805400,
+      "magnitude": 2.6,
+      "color": "#b9d3ff"
+    },
+    {
+      "id": "pi-scorpii",
+      "name": "Pi Scorpii",
+      "ra": 15.980900,
+      "dec": -26.114100,
+      "magnitude": 2.9,
+      "color": "#b9d3ff"
+    },
+    {
+      "id": "antares",
+      "name": "Antares",
+      "ra": 16.490100,
+      "dec": -26.432000,
+      "magnitude": 1.1,
+      "color": "#ff8060"
+    },
+    {
+      "id": "epsilon-scorpii",
+      "name": "Epsilon Scorpii",
+      "ra": 16.836100,
+      "dec": -34.293200,
+      "magnitude": 2.3,
+      "color": "#ffccaa"
+    },
+    {
+      "id": "sargas",
+      "name": "Sargas",
+      "ra": 17.621900,
+      "dec": -42.997800,
+      "magnitude": 1.9,
+      "color": "#fff0d0"
+    },
+    {
+      "id": "shaula",
+      "name": "Shaula",
+      "ra": 17.560100,
+      "dec": -37.103800,
+      "magnitude": 1.6,
+      "color": "#b9d3ff"
+    },
+    {
+      "id": "lesath",
+      "name": "Lesath",
+      "ra": 17.512700,
+      "dec": -37.295800,
+      "magnitude": 2.7,
+      "color": "#b9d3ff"
+    }
+  ]
+}

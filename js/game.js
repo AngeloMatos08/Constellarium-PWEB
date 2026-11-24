@@ -9,11 +9,21 @@ export function createGame() {
     const challengeStars = [];
 
     let connections = [];
+    let attemptHistory = [];
     let selectedStar = null;
     let correctConnections = [];
 
     let connectionFeedback = [];
     let feedbackMessage = null;
+
+    // HISTÓRICO DE ERROS DA CONSTELAÇÃO
+    let totalErrors = 0;
+
+
+    // CONFIGURAÇÃO DA PONTUAÇÃO
+    const POINTS_PER_CORRECT = 100;
+    const POINTS_PER_ERROR = 25;
+    const PERFECT_BONUS = 100;
 
 
     // NORMALIZAR CONEXÕES PARA COMPARAÇÃO
@@ -62,7 +72,8 @@ export function createGame() {
 
         return {
             correct: correctCount,
-            incorrect: incorrectCount,
+            incorrect: totalErrors,
+            attemptedErrors: incorrectCount,
             total,
             remaining,
 
@@ -78,14 +89,47 @@ export function createGame() {
     }
 
 
+    // CALCULAR PONTUAÇÃO DA CONSTELAÇÃO
+    function getScore() {
+
+        const progress = getProgress();
+
+        const correctPoints =
+            progress.correct * POINTS_PER_CORRECT;
+
+        const errorPenalty =
+            totalErrors * POINTS_PER_ERROR;
+
+        const perfectBonus =
+            progress.complete && totalErrors === 0
+                ? PERFECT_BONUS
+                : 0;
+
+        const total = Math.max(
+            0,
+            correctPoints - errorPenalty + perfectBonus
+        );
+
+        return {
+            correctPoints,
+            errorPenalty,
+            perfectBonus,
+            total
+        };
+
+    }
+
+
     // CARREGAR CONSTELAÇÃO
     function loadConstellation(constellation) {
-
+        
         connections.length = 0;
         connectionFeedback.length = 0;
-
+        attemptHistory.length = 0;
         selectedStar = null;
         feedbackMessage = null;
+
+        totalErrors = 0;
 
         currentConstellation = constellation;
 
@@ -120,7 +164,11 @@ export function createGame() {
         }
 
         connections.push([starA, starB]);
-
+        attemptHistory.push({
+            type: "connection",
+            starA,
+            starB
+        });
         const correct =
             isCorrectConnection(starA, starB);
 
@@ -132,6 +180,10 @@ export function createGame() {
         };
 
         connectionFeedback.push(result);
+
+        if (!correct) {
+            totalErrors++;
+        }
 
         feedbackMessage = {
             type: result.status,
@@ -161,7 +213,8 @@ export function createGame() {
 
             return {
                 selected: true,
-                progress: getProgress()
+                progress: getProgress(),
+                score: getScore()
             };
 
         }
@@ -176,7 +229,8 @@ export function createGame() {
         return {
             selected: true,
             connection: result,
-            progress: getProgress()
+            progress: getProgress(),
+            score: getScore()
         };
 
     }
@@ -205,9 +259,11 @@ export function createGame() {
     }
 
 
-    // LIMPAR TENTATIVA
+    // LIMPAR CONEXÕES SEM APAGAR O HISTÓRICO DE ERROS
     function reset() {
-
+        attemptHistory.push({
+            type: "reset"
+        });
         connections.length = 0;
         connectionFeedback.length = 0;
 
@@ -231,14 +287,22 @@ export function createGame() {
                 selectedStar,
                 correctConnections,
                 connectionFeedback,
+                attemptHistory,
 
-                // Getters mantêm os dados atualizados
                 get feedbackMessage() {
                     return feedbackMessage;
                 },
 
                 get progress() {
                     return getProgress();
+                },
+
+                get score() {
+                    return getScore();
+                },
+
+                get totalErrors() {
+                    return totalErrors;
                 }
             };
 

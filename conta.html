@@ -1,0 +1,285 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#07101b">
+
+    <title>Minha conta | Constellarium</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="css/site.css">
+    <link rel="stylesheet" href="css/account.css">
+</head>
+
+<body class="account-page">
+
+    <header class="site-header">
+        <a class="brand" href="/" aria-label="Constellarium, página inicial">
+            <span class="brand-mark" aria-hidden="true">C</span>
+            <span>CONSTELLARIUM</span>
+        </a>
+
+        <nav class="site-nav" aria-label="Navegação principal">
+            <a href="/">Início</a>
+            <a href="/como-jogar">Como jogar</a>
+            <a href="/sobre">Sobre o projeto</a>
+            <a class="nav-play" href="/jogo">
+                Jogar <span aria-hidden="true">↗</span>
+            </a>
+        </nav>
+    </header>
+
+    <main class="account-main">
+
+        <section class="account-intro">
+
+            <p class="eyebrow">
+                <span class="status-dot"></span>
+                SEU ESPAÇO NO UNIVERSO
+            </p>
+
+            <h1>
+                Cada descoberta
+                começa com
+                <span>um olhar.</span>
+            </h1>
+
+            <p class="account-description">
+                Entre no Constellarium para acompanhar suas descobertas,
+                registrar suas conquistas e comparar seu progresso com
+                outros exploradores.
+            </p>
+
+            <div class="account-meta">
+                <span>EXPLORAÇÃO</span>
+                <span class="meta-rule"></span>
+                <span>DESCOBERTA</span>
+                <span class="meta-rule"></span>
+                <span>CONHECIMENTO</span>
+            </div>
+
+            <div class="account-decoration" aria-hidden="true">
+                <div class="orbit orbit-one"></div>
+                <div class="orbit orbit-two"></div>
+
+                <span class="orbit-star star-one"></span>
+                <span class="orbit-star star-two"></span>
+                <span class="orbit-star star-three"></span>
+                <span class="orbit-star star-four"></span>
+
+                <span class="orbit-center">C</span>
+
+                <span class="orbit-label">RA 05h 35m</span>
+                <span class="orbit-label orbit-label-bottom">DEC −05° 23′</span>
+            </div>
+
+        </section>
+
+        <section class="account-panel">
+
+            <div class="account-panel-heading">
+                <p class="eyebrow">CONSTELLARIUM / ACCOUNT</p>
+                <h2 id="account-heading">Bem-vindo de volta.</h2>
+                <p id="account-subheading">
+                    Entre para continuar sua exploração.
+                </p>
+            </div>
+
+            <div class="account-tabs" role="tablist" aria-label="Acesso à conta">
+
+                <button
+                    class="account-tab active"
+                    id="login-tab"
+                    type="button"
+                    role="tab"
+                    aria-selected="true"
+                    aria-controls="login-form"
+                    data-tab="login"
+                >
+                    Entrar
+                </button>
+
+                <button
+                    class="account-tab"
+                    id="register-tab"
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="register-form"
+                    data-tab="register"
+                >
+                    Criar conta
+                </button>
+
+            </div>
+
+            <form id="login-form" class="account-form" data-form="login">
+
+                <div class="form-field">
+                    <label for="login-email">E-mail</label>
+
+                    <input
+                        type="email"
+                        id="login-email"
+                        name="email"
+                        placeholder="voce@exemplo.com"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+                <div class="form-field">
+                    <div class="field-heading">
+                        <label for="login-password">Senha</label>
+                        <a href="#" id="forgot-password">Esqueceu a senha?</a>
+                    </div>
+
+                    <input
+                        type="password"
+                        id="login-password"
+                        name="password"
+                        placeholder="Sua senha"
+                        autocomplete="current-password"
+                        required
+                        minlength="6"
+                    >
+                </div>
+
+                <button class="account-submit" type="submit">
+                    Entrar na minha conta
+                    <span aria-hidden="true">↗</span>
+                </button>
+
+            </form>
+
+            <form
+                id="register-form"
+                class="account-form hidden"
+                data-form="register"
+            >
+
+                <div class="form-field">
+                    <label for="register-nickname">Como devemos chamar você?</label>
+
+                    <input
+                        type="text"
+                        id="register-nickname"
+                        name="nickname"
+                        placeholder="Seu apelido"
+                        autocomplete="nickname"
+                        maxlength="24"
+                        required
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="register-email">E-mail</label>
+
+                    <input
+                        type="email"
+                        id="register-email"
+                        name="email"
+                        placeholder="voce@exemplo.com"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="register-password">Senha</label>
+
+                    <input
+                        type="password"
+                        id="register-password"
+                        name="password"
+                        placeholder="Mínimo de 6 caracteres"
+                        autocomplete="new-password"
+                        minlength="6"
+                        required
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="register-confirm-password">
+                        Confirmar senha
+                    </label>
+
+                    <input
+                        type="password"
+                        id="register-confirm-password"
+                        name="confirm-password"
+                        placeholder="Digite a senha novamente"
+                        autocomplete="new-password"
+                        minlength="6"
+                        required
+                    >
+                </div>
+
+                <button class="account-submit" type="submit">
+                    Criar minha conta
+                    <span aria-hidden="true">↗</span>
+                </button>
+
+            </form>
+
+            <div class="account-divider">
+                <span></span>
+                <p>OU CONTINUE COM</p>
+                <span></span>
+            </div>
+
+            <button class="google-button" id="google-login" type="button">
+                <svg
+                    viewBox="0 0 48 48"
+                    aria-hidden="true"
+                    class="google-icon"
+                >
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.25 5.48-4.73 7.18l7.72 5.99c4.51-4.17 7.05-10.31 7.05-17.64Z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.93 23.93 0 0 0 0 24c0 3.87.93 7.52 2.56 10.78l7.97-6.19Z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.81l-7.72-5.99c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z"/>
+                </svg>
+
+                Continuar com Google
+            </button>
+
+            <p
+                id="account-message"
+                class="account-message"
+                role="status"
+                aria-live="polite"
+            ></p>
+
+            <p class="account-terms">
+                Ao continuar, você concorda em utilizar o Constellarium
+                de forma responsável.
+            </p>
+
+        </section>
+
+    </main>
+
+    <footer class="account-footer">
+        <a class="brand brand-footer" href="/">
+            <span class="brand-mark">C</span>
+            <span>CONSTELLARIUM</span>
+        </a>
+
+        <span>UM UNIVERSO DE DESCOBERTAS.</span>
+
+        <a href="/">Voltar ao início <span>↗</span></a>
+    </footer>
+
+    <script type="module" src="js/account.js"></script>
+
+</body>
+</html>

@@ -9,7 +9,10 @@ import { createTelescope } from "./telescope.js";
 import { createBackgroundStars } from "./background-stars.js";
 import { createChallengeStars } from "./challenge-stars.js";
 import { createShootingStars } from "./shooting-stars.js";
+import { auth, googleProvider } from "./firebase.js";
 
+console.log("Firebase Auth:", auth);
+console.log("Google Provider:", googleProvider);
 const game = createGame();
 const telescope = createTelescope();
 const shootingStars = createShootingStars();
@@ -1194,26 +1197,72 @@ async function startGame() {
 startGame();
 
 
+// CONTROLE DA CAMPANHA
+
+let campaignConstellations = [];
+let campaignIndex = 0;
+let campaignResults = [];
+let resultRecorded = false;
+let campaignSubmission = null;
+
+// EMBARALHAR CONSTELAÇÕES (FISHER-YATES)
+
+function shuffleConstellations(constellations) {
+
+    const shuffled = [...constellations];
+
+    for (let i = shuffled.length - 1; i > 0; i--) {
+
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [shuffled[i], shuffled[j]] =
+            [shuffled[j], shuffled[i]];
+
+    }
+
+    return shuffled;
+
+}
+
+
 // PRÓXIMA CONSTELAÇÃO
 
 function nextConstellation() {
 
-    const state =
-        game.getState();
+    const state = game.getState();
 
-    const randomIndex =
-        Math.floor(
-            Math.random() *
-            state.constellations.length
-        );
+    // INICIAR CAMPANHA SE NECESSÁRIO
+
+    if (campaignConstellations.length === 0) {
+
+        campaignConstellations =
+            shuffleConstellations(state.constellations);
+
+        campaignIndex = 0;
+        campaignResults = [];
+
+    }
+
+    // VERIFICAR SE A CAMPANHA TERMINOU
+
+    if (campaignIndex >= campaignConstellations.length) {
+
+        showCampaignResult();
+        return;
+
+    }
 
     const currentConstellation =
-        state.constellations[randomIndex];
+        campaignConstellations[campaignIndex];
 
-    game.loadConstellation(
-        currentConstellation
-    );
+    game.loadConstellation(currentConstellation);
+
+    resultRecorded = false;
+
+    continueButton.textContent = "Continuar";
+
     updateChallengeProgress();
+
     constellationName.textContent =
         currentConstellation.name;
 
@@ -1243,74 +1292,248 @@ function nextConstellation() {
     drawGame();
 
     console.log(
-        "Nova constelação:",
+        `Constelação ${campaignIndex + 1}/${campaignConstellations.length}:`,
         currentConstellation.name
     );
 
 }
 
 
-// FINALIZAR JOGO
+// FINALIZAR TENTATIVA
 
 function finishGame() {
 
-    const state =
-        game.getState();
+    const state = game.getState();
 
-    const result =
-        validateConstellation(
-            state.connections,
-            state.correctConnections
-        );
+    const result = validateConstellation(
+        state.connections,
+        state.correctConnections
+    );
+
+    // Mesmo incompleta, a tentativa será registrada.
 
     showResult(result);
 
 }
 
 
-// REINICIAR JOGO
+// REINICIAR CONEXÕES
 
 function resetGame() {
 
     game.reset();
+
     updateChallengeProgress();
+
     drawGame();
 
 }
 
 
-// EXIBIR RESULTADO
+// EXIBIR RESULTADO DA CONSTELAÇÃO
+
+
+// EXIBIR RESULTADO DA CONSTELAÇÃO
 
 function showResult(isCorrect) {
+
+    const state = game.getState();
+
+    // Impedir que a mesma constelação seja registrada duas vezes.
+    if (!resultRecorded) {
+
+        campaignResults.push({
+
+            constellationId: state.currentConstellation.id,
+            constellationName: state.currentConstellation.name,
+
+            // HISTÓRICO DE AÇÕES
+            attempts: state.attemptHistory.map(attempt => ({
+                ...attempt
+            })),
+
+            // DADOS PARA EXIBIÇÃO NA TELA FINAL
+            // O BACKEND RECALCULARÁ ESSES VALORES.
+            score: state.score.total,
+            errors: state.totalErrors,
+            completed: isCorrect
+
+        });
+
+        resultRecorded = true;
+
+    }
 
     resultScreen.classList.remove("hidden");
 
     if (isCorrect) {
 
-        resultTitle.textContent =
-            "Correta";
+        resultTitle.textContent = "Constelação concluída!";
 
         resultMessage.textContent =
-            "Você encontrou a constelação.";
+            `Você encontrou todas as conexões!\n\n` +
+            `Pontuação: ${state.score.total} pontos`;
 
     } else {
 
-        resultTitle.textContent =
-            "Errado";
+        resultTitle.textContent = "Tentativa finalizada";
 
         resultMessage.textContent =
-            "As conexões não correspondem à constelação.";
+            `Você não completou todas as conexões, mas pode continuar!\n\n` +
+            `Pontuação parcial: ${state.score.total} pontos`;
 
     }
 
 }
 
 
+// RESULTADO FINAL DA CAMPANHA
+// RESULTADO FINAL DA CAMPANHA
+
+function showCampaignResult() {
+
+    const totalScore = campaignResults.reduce(
+        (total, result) => total + result.score,
+        0
+    );
+
+    const details = campaignResults.map((result, index) => {
+
+        return `${index + 1}. ${result.constellationName}: ${result.score} pontos`;
+
+    }).join("\n");
+
+    resultTitle.textContent = "Campanha concluída!";
+
+    resultMessage.textContent =
+        `Você explorou todas as constelações!\n\n` +
+        `${details}\n\n` +
+        `Pontuação final: ${totalScore} pontos`;
+
+    continueButton.textContent = "Jogar novamente";
+
+    resultScreen.classList.remove("hidden");
+
+    console.log("Resultado da campanha:", {
+        results: campaignResults,
+        totalScore
+    });
+
+    saveCampaign();
+
+}
+// SALVAR CAMPANHA NO MONGODB
+
+async function saveCampaign() {
+
+    // Evitar envios duplicados.
+
+    if (campaignSubmission) {
+        return campaignSubmission;
+    }
+
+    const user = auth.currentUser;
+
+    if (!user) {
+
+        resultMessage.textContent +=
+            "\n\nEntre na sua conta para salvar sua campanha.";
+
+        return;
+
+    }
+
+    campaignSubmission = (async () => {
+
+        try {
+
+            resultMessage.textContent +=
+                "\n\nSalvando campanha...";
+
+            // Obter token de autenticação do Firebase.
+
+            const token = await user.getIdToken();
+
+            // Enviar resultados ao backend.
+
+            const response = await fetch("/api/campaigns", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+
+                body: JSON.stringify({
+                    results: campaignResults
+                })
+
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error || "Não foi possível salvar a campanha."
+                );
+
+            }
+
+            console.log("Campanha salva no MongoDB:", data);
+
+            resultMessage.textContent +=
+                "\n\nCampanha salva com sucesso!";
+
+        } catch (error) {
+
+            console.error(
+                "Erro ao salvar campanha:",
+                error
+            );
+
+            resultMessage.textContent +=
+                "\n\nNão foi possível salvar sua campanha. " +
+                "Verifique sua conexão e tente novamente.";
+
+            // Permitir uma nova tentativa caso tenha falhado.
+
+            campaignSubmission = null;
+
+        }
+
+    })();
+
+    return campaignSubmission;
+
+}
+
 // CONTINUAR JOGO
+
+// CONTINUAR JOGO OU INICIAR NOVA CAMPANHA
 
 function continueGame() {
 
     resultScreen.classList.add("hidden");
+
+    // Se a campanha terminou, iniciar uma nova.
+
+    if (campaignIndex >= campaignConstellations.length) {
+
+        campaignConstellations = [];
+        campaignIndex = 0;
+        campaignResults = [];
+        resultRecorded = false;
+        campaignSubmission = null;
+
+        nextConstellation();
+
+        return;
+
+    }
+
+    campaignIndex++;
 
     nextConstellation();
 

@@ -1,3 +1,4 @@
+
 const express = require("express");
 const path = require("node:path");
 
@@ -12,7 +13,9 @@ const routeTable = new Map([
     ["/sobre", "sobre.html"],
     ["/sobre.html", "sobre.html"],
     ["/jogo", "jogo.html"],
-    ["/jogo.html", "jogo.html"]
+    ["/jogo.html", "jogo.html"],
+    ["/conta", "conta.html"],
+    ["/conta.html", "conta.html"]
 ]);
 
 router.get([...routeTable.keys()], (request, response, next) => {

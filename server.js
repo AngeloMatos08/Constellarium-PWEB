@@ -14,6 +14,7 @@ const port = Number(process.env.PORT) || 3000;
 
 app.disable("x-powered-by");
 
+app.use(express.json({ limit: "100kb" }));
 app.use("/css", express.static(path.join(rootDirectory, "css")));
 app.use("/js", express.static(path.join(rootDirectory, "js")));
 app.use("/data", express.static(path.join(rootDirectory, "data")));
