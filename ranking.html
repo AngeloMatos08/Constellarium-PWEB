@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#07101b">
+    <meta name="description" content="Confira o ranking dos exploradores do Constellarium e descubra quem alcançou as maiores pontuações.">
+
+    <title>Constellarium | Ranking</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="/css/ranking.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+        <a class="brand" href="/" aria-label="Constellarium, página inicial">
+            <span class="brand-mark" aria-hidden="true">C</span>
+            <span>CONSTELLARIUM</span>
+        </a>
+
+        <nav class="site-nav" aria-label="Navegação principal">
+            <a href="/">Início</a>
+            <a href="/como-jogar">Como jogar</a>
+            <a href="/sobre">Sobre o projeto</a>
+            <a href="/ranking" aria-current="page">Ranking</a>
+            <a class="nav-play" href="/jogo">Jogar <span aria-hidden="true">↗</span></a>
+        </nav>
+    </header>
+
+    <main class="ranking-page page-wrap">
+
+        <section class="ranking-hero">
+            <div>
+                <p class="eyebrow">
+                    <span class="status-dot"></span>
+                    REGISTRO DE EXPLORADORES
+                </p>
+
+                <h1>Ranking<span class="title-period">.</span></h1>
+
+                <p class="ranking-description">
+                    Cada estrela conta uma história. Confira os exploradores
+                    que alcançaram as maiores pontuações em suas campanhas.
+                </p>
+            </div>
+
+            <div class="ranking-symbol" aria-hidden="true">
+                <span class="ranking-orbit orbit-one"></span>
+                <span class="ranking-orbit orbit-two"></span>
+                <span class="ranking-core">✳</span>
+            </div>
+        </section>
+
+        <section class="podium-section" aria-labelledby="podium-title">
+            <div class="ranking-section-heading">
+                <div>
+                    <p class="eyebrow">OS DESTAQUES</p>
+                    <h2 id="podium-title">Os melhores exploradores</h2>
+                </div>
+
+                <span class="ranking-caption">TOP 03</span>
+            </div>
+
+            <div id="ranking-podium" class="podium">
+                <p class="ranking-loading">Carregando os exploradores...</p>
+            </div>
+        </section>
+
+        <section class="ranking-table-section" aria-labelledby="table-title">
+
+            <div class="ranking-section-heading">
+                <div>
+                    <p class="eyebrow">CLASSIFICAÇÃO GERAL</p>
+                    <h2 id="table-title">Todos os exploradores</h2>
+                </div>
+
+                <span id="ranking-count" class="ranking-caption">0 JOGADORES</span>
+            </div>
+
+            <div class="ranking-table-wrapper">
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">POSIÇÃO</th>
+                            <th scope="col">EXPLORADOR</th>
+                            <th scope="col">PONTUAÇÃO</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="ranking-list">
+                        <tr>
+                            <td colspan="3" class="ranking-loading">
+                                Carregando ranking...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p id="ranking-message" class="ranking-message" role="status" aria-live="polite"></p>
+
+        </section>
+
+        <section class="ranking-cta">
+            <div>
+                <p class="eyebrow">SUA JORNADA COMEÇA AQUI</p>
+                <h2>Que tal deixar sua marca entre as estrelas?</h2>
+            </div>
+
+            <a class="button button-primary" href="/jogo">
+                Começar a jogar <span aria-hidden="true">↗</span>
+            </a>
+        </section>
+
+    </main>
+
+    <footer class="site-footer page-wrap">
+        <a class="brand brand-footer" href="/">
+            <span class="brand-mark" aria-hidden="true">C</span>
+            <span>CONSTELLARIUM</span>
+        </a>
+
+        <span>Um projeto educativo de astronomia.</span>
+
+        <a href="/sobre">
+            Sobre o projeto <span aria-hidden="true">↗</span>
+        </a>
+    </footer>
+
+    <script type="module" src="/js/ranking.js"></script>
+
+</body>
+</html>

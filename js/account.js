@@ -7,7 +7,6 @@ import {
     signInWithPopup,
     sendEmailVerification,
     sendPasswordResetEmail,
-    updateProfile,
     signOut,
     getIdToken
 } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
@@ -19,6 +18,7 @@ const tabs = document.querySelectorAll(".account-tab");
 
 const loginForm = document.getElementById("login-form");
 const registerForm = document.getElementById("register-form");
+const profileForm = document.getElementById("profile-form");
 
 const heading = document.getElementById("account-heading");
 const subheading = document.getElementById("account-subheading");
@@ -28,8 +28,14 @@ const message = document.getElementById("account-message");
 const googleButton = document.getElementById("google-login");
 const forgotPassword = document.getElementById("forgot-password");
 
+const accountTabs = document.querySelector(".account-tabs");
+const accountDivider = document.querySelector(".account-divider");
+
 const loginButton = loginForm.querySelector('[type="submit"]');
 const registerButton = registerForm.querySelector('[type="submit"]');
+const profileButton = profileForm.querySelector('[type="submit"]');
+
+let pendingProfileUser = null;
 
 
 // MENSAGENS
@@ -84,6 +90,7 @@ function getFirebaseError(error) {
     };
 
     return errors[error.code] ||
+        error.message ||
         "Não foi possível concluir a operação. Tente novamente.";
 
 }
@@ -102,31 +109,233 @@ function setBusy(button, busy, originalText) {
 }
 
 
-// TESTAR AUTENTICAÇÃO COM O BACKEND
+// VALIDAR APELIDO
 
-async function verifyBackendSession(user) {
+function validateNickname(nickname) {
+
+    const cleanNickname = nickname
+        .replace(/\s+/g, " ")
+        .trim();
+
+    if (
+        cleanNickname.length < 2 ||
+        cleanNickname.length > 16 ||
+        !/^[\p{L}\p{N}_ ]+$/u.test(cleanNickname)
+    ) {
+
+        throw new Error(
+            "O apelido deve ter entre 2 e 16 caracteres e utilizar apenas letras, números, espaços ou underline."
+        );
+
+    }
+
+    return cleanNickname;
+
+}
+
+
+// REQUISIÇÕES AO BACKEND
+
+async function apiRequest(url, user, options = {}) {
 
     const token = await getIdToken(user);
 
-    const response = await fetch("/api/session", {
-        method: "GET",
+    const response = await fetch(url, {
+
+        ...options,
+
         headers: {
+
+            ...(options.headers || {}),
+
             Authorization: `Bearer ${token}`
+
         }
+
     });
+
+    const contentType =
+        response.headers.get("content-type") || "";
+
+    if (!contentType.includes("application/json")) {
+
+        throw new Error(
+            "O servidor retornou uma resposta inesperada. Verifique a rota e tente novamente."
+        );
+
+    }
 
     const data = await response.json();
 
+    return {
+        response,
+        data
+    };
+
+}
+
+
+// VALIDAR AUTENTICAÇÃO COM O BACKEND
+
+async function verifyBackendSession(user) {
+
+    const { response, data } = await apiRequest(
+        "/api/session",
+        user,
+        {
+            method: "GET"
+        }
+    );
+
     if (!response.ok) {
+
         throw new Error(
             data.error || "Falha na autenticação com o servidor."
         );
+
     }
 
     console.log("Sessão validada pelo backend:", data);
 
     return data;
+
 }
+
+
+// CONSULTAR PERFIL NO MONGODB
+
+async function getUserProfile(user) {
+
+    const { response, data } = await apiRequest(
+        "/api/profile",
+        user,
+        {
+            method: "GET"
+        }
+    );
+
+    if (response.status === 404) {
+        return null;
+    }
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.error || "Não foi possível consultar seu perfil."
+        );
+
+    }
+
+    return data.profile;
+
+}
+
+
+// CRIAR PERFIL NO MONGODB
+
+async function createUserProfile(user, nickname) {
+
+    const cleanNickname = validateNickname(nickname);
+
+    const { response, data } = await apiRequest(
+        "/api/profile",
+        user,
+        {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                nickname: cleanNickname
+            })
+
+        }
+    );
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.error || "Não foi possível registrar seu perfil."
+        );
+
+    }
+
+    console.log("Perfil salvo:", data.profile);
+
+    return data.profile;
+
+}
+
+
+// EXIBIR FORMULÁRIO DE ESCOLHA DE APELIDO
+
+function showProfileForm(user) {
+
+    pendingProfileUser = user;
+
+    loginForm.classList.add("hidden");
+    registerForm.classList.add("hidden");
+
+    profileForm.classList.remove("hidden");
+
+    accountTabs.classList.add("hidden");
+    accountDivider.classList.add("hidden");
+    googleButton.classList.add("hidden");
+
+    heading.textContent = "Escolha seu apelido.";
+
+    subheading.textContent =
+        "Defina como você aparecerá no ranking do Constellarium.";
+
+    message.textContent = "";
+    message.dataset.type = "";
+
+    document.getElementById("profile-nickname").value = "";
+
+}
+
+
+// RESTAURAR INTERFACE DE LOGIN
+
+function restoreAccountInterface() {
+
+    profileForm.classList.add("hidden");
+
+    accountTabs.classList.remove("hidden");
+    accountDivider.classList.remove("hidden");
+    googleButton.classList.remove("hidden");
+
+    changeAccountTab("login");
+
+}
+
+
+// VERIFICAR SE O USUÁRIO POSSUI PERFIL
+
+async function ensureUserProfile(user) {
+
+    const profile = await getUserProfile(user);
+
+    if (profile) {
+        return profile;
+    }
+
+    // USUÁRIO AINDA NÃO POSSUI APELIDO
+
+    showProfileForm(user);
+
+    showMessage(
+        "Escolha um apelido para começar sua jornada.",
+        "info"
+    );
+
+    return null;
+
+}
+
 
 // ALTERNAR ENTRE LOGIN E CADASTRO
 
@@ -136,6 +345,14 @@ function changeAccountTab(selectedTab) {
 
     loginForm.classList.toggle("hidden", !isLogin);
     registerForm.classList.toggle("hidden", isLogin);
+
+    profileForm.classList.add("hidden");
+
+    accountTabs.classList.remove("hidden");
+    accountDivider.classList.remove("hidden");
+    googleButton.classList.remove("hidden");
+
+    pendingProfileUser = null;
 
     tabs.forEach(tab => {
 
@@ -182,9 +399,6 @@ registerForm.addEventListener("submit", async event => {
 
     event.preventDefault();
 
-    const nickname =
-        document.getElementById("register-nickname").value.trim();
-
     const email =
         document.getElementById("register-email").value.trim();
 
@@ -193,17 +407,6 @@ registerForm.addEventListener("submit", async event => {
 
     const confirmPassword =
         document.getElementById("register-confirm-password").value;
-
-    if (nickname.length < 2) {
-
-        showMessage(
-            "Seu apelido precisa ter pelo menos 2 caracteres.",
-            "error"
-        );
-
-        return;
-
-    }
 
     if (password !== confirmPassword) {
 
@@ -243,12 +446,6 @@ registerForm.addEventListener("submit", async event => {
                 email,
                 password
             );
-
-        // SALVAR APELIDO NO PERFIL DO FIREBASE
-
-        await updateProfile(credential.user, {
-            displayName: nickname
-        });
 
         // ENVIAR E-MAIL DE VERIFICAÇÃO
 
@@ -315,7 +512,11 @@ loginForm.addEventListener("submit", async event => {
             );
 
         const user = credential.user;
+
+        // VALIDAR SESSÃO NO BACKEND
+
         await verifyBackendSession(user);
+
         // EXIGIR VERIFICAÇÃO DO E-MAIL
 
         if (!user.emailVerified) {
@@ -333,16 +534,26 @@ loginForm.addEventListener("submit", async event => {
 
         }
 
+        // CONSULTAR PERFIL NO MONGODB
+
+        const profile = await ensureUserProfile(user);
+
+        if (!profile) {
+            return;
+        }
+
         showMessage(
-            `Login realizado com sucesso! Bem-vindo${user.displayName ? `, ${user.displayName}` : ""}.`,
+            `Login realizado com sucesso! Bem-vindo, ${profile.nickname}.`,
             "success"
         );
 
         console.log("Usuário autenticado:", {
+
             uid: user.uid,
             email: user.email,
             emailVerified: user.emailVerified,
-            displayName: user.displayName
+            nickname: profile.nickname
+
         });
 
     } catch (error) {
@@ -379,18 +590,31 @@ googleButton.addEventListener("click", async () => {
             await signInWithPopup(auth, googleProvider);
 
         const user = credential.user;
+
+        // VALIDAR SESSÃO NO BACKEND
+
         await verifyBackendSession(user);
 
+        // CONSULTAR PERFIL NO MONGODB
+
+        const profile = await ensureUserProfile(user);
+
+        if (!profile) {
+            return;
+        }
+
         showMessage(
-            `Login com Google realizado! Bem-vindo${user.displayName ? `, ${user.displayName}` : ""}.`,
+            `Login com Google realizado! Bem-vindo, ${profile.nickname}.`,
             "success"
         );
 
         console.log("Usuário autenticado com Google:", {
+
             uid: user.uid,
             email: user.email,
             emailVerified: user.emailVerified,
-            displayName: user.displayName
+            nickname: profile.nickname
+
         });
 
     } catch (error) {
@@ -405,6 +629,86 @@ googleButton.addEventListener("click", async () => {
     } finally {
 
         googleButton.disabled = false;
+
+    }
+
+});
+
+
+// CONFIRMAR ESCOLHA DO APELIDO
+
+profileForm.addEventListener("submit", async event => {
+
+    event.preventDefault();
+
+    if (!pendingProfileUser) {
+
+        showMessage(
+            "Não foi possível identificar sua sessão. Entre novamente.",
+            "error"
+        );
+
+        return;
+
+    }
+
+    let nickname;
+
+    try {
+
+        nickname = validateNickname(
+            document.getElementById("profile-nickname").value
+        );
+
+    } catch (error) {
+
+        showMessage(error.message, "error");
+        return;
+
+    }
+
+    setBusy(
+        profileButton,
+        true,
+        "Confirmar apelido ↗"
+    );
+
+    try {
+
+        // CRIAR PERFIL COM O APELIDO ESCOLHIDO
+
+        const profile = await createUserProfile(
+            pendingProfileUser,
+            nickname
+        );
+
+        pendingProfileUser = null;
+
+        restoreAccountInterface();
+
+        showMessage(
+            `Perfil criado com sucesso! Bem-vindo ao Constellarium, ${profile.nickname}.`,
+            "success"
+        );
+
+        console.log("Novo perfil criado:", profile);
+
+    } catch (error) {
+
+        console.error("Erro ao criar perfil:", error);
+
+        showMessage(
+            getFirebaseError(error),
+            "error"
+        );
+
+    } finally {
+
+        setBusy(
+            profileButton,
+            false,
+            "Confirmar apelido ↗"
+        );
 
     }
 

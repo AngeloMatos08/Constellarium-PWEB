@@ -15,7 +15,9 @@ const routeTable = new Map([
     ["/jogo", "jogo.html"],
     ["/jogo.html", "jogo.html"],
     ["/conta", "conta.html"],
-    ["/conta.html", "conta.html"]
+    ["/conta.html", "conta.html"],
+    ["/ranking", "ranking.html"],
+    ["/ranking.html", "ranking.html"]
 ]);
 
 router.get([...routeTable.keys()], (request, response, next) => {

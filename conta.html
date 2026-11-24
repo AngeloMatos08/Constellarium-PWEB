@@ -122,6 +122,8 @@
 
             </div>
 
+            <!-- LOGIN COM E-MAIL -->
+
             <form id="login-form" class="account-form" data-form="login">
 
                 <div class="form-field">
@@ -161,25 +163,13 @@
 
             </form>
 
+            <!-- CADASTRO COM E-MAIL -->
+
             <form
                 id="register-form"
                 class="account-form hidden"
                 data-form="register"
             >
-
-                <div class="form-field">
-                    <label for="register-nickname">Como devemos chamar você?</label>
-
-                    <input
-                        type="text"
-                        id="register-nickname"
-                        name="nickname"
-                        placeholder="Seu apelido"
-                        autocomplete="nickname"
-                        maxlength="24"
-                        required
-                    >
-                </div>
 
                 <div class="form-field">
                     <label for="register-email">E-mail</label>
@@ -231,11 +221,49 @@
 
             </form>
 
+            <!-- ESCOLHA DO APELIDO PÚBLICO -->
+
+            <form
+                id="profile-form"
+                class="account-form hidden"
+                data-form="profile"
+            >
+
+                <div class="form-field">
+                    <label for="profile-nickname">
+                        Como você quer aparecer no ranking?
+                    </label>
+
+                    <input
+                        type="text"
+                        id="profile-nickname"
+                        name="nickname"
+                        placeholder="Escolha seu apelido"
+                        autocomplete="nickname"
+                        minlength="2"
+                        maxlength="16"
+                        required
+                    >
+
+                    <p class="field-hint">
+                        Escolha um apelido exclusivo de 2 a 16 caracteres.
+                    </p>
+                </div>
+
+                <button class="account-submit" type="submit">
+                    Confirmar apelido
+                    <span aria-hidden="true">↗</span>
+                </button>
+
+            </form>
+
             <div class="account-divider">
                 <span></span>
                 <p>OU CONTINUE COM</p>
                 <span></span>
             </div>
+
+            <!-- LOGIN COM GOOGLE -->
 
             <button class="google-button" id="google-login" type="button">
                 <svg

@@ -1,9 +1,11 @@
 
 const express = require("express");
 
+const User = require("../models/User.js");
 const Star = require("../models/Star.js");
 const Constellation = require("../models/Constellation.js");
 const Campaign = require("../models/Campaign.js");
+
 const authenticateUser = require("../middleware/auth.js");
 
 const router = express.Router();
@@ -24,11 +26,15 @@ function normalizeConnection(a, b) {
 
 // CALCULAR RESULTADO NO SERVIDOR
 
-function calculateResult(constellation, attempts) {
+function calculateResult(constellation, attempts, registeredStarIds) {
+
+    // ESTRELAS QUE PERTENCEM À CONSTELAÇÃO ATUAL
 
     const validStarIds = new Set(
         constellation.stars.map(star => star.id)
     );
+
+    // CONEXÕES CORRETAS DA CONSTELAÇÃO
 
     const correctConnections = new Set(
         constellation.connections.map(connection =>
@@ -55,19 +61,27 @@ function calculateResult(constellation, attempts) {
             attempt.type !== "connection" ||
             typeof attempt.starA !== "string" ||
             typeof attempt.starB !== "string" ||
+            !attempt.starA.trim() ||
+            !attempt.starB.trim() ||
             attempt.starA === attempt.starB
         ) {
             throw new Error("Tentativa de conexão inválida.");
         }
 
-        // VERIFICAR SE AS ESTRELAS PERTENCEM À CONSTELAÇÃO
+        // VERIFICAR SE AS ESTRELAS EXISTEM NO BANCO
 
         if (
-            !validStarIds.has(attempt.starA) ||
-            !validStarIds.has(attempt.starB)
+            !registeredStarIds.has(attempt.starA) ||
+            !registeredStarIds.has(attempt.starB)
         ) {
-            throw new Error("Estrela não pertence à constelação.");
+            throw new Error("Estrela não encontrada.");
         }
+
+        // VERIFICAR SE AS ESTRELAS PERTENCEM À CONSTELAÇÃO
+
+        const starsBelongToConstellation =
+            validStarIds.has(attempt.starA) &&
+            validStarIds.has(attempt.starB);
 
         const connectionId = normalizeConnection(
             attempt.starA,
@@ -84,7 +98,10 @@ function calculateResult(constellation, attempts) {
 
         // CONTABILIZAR ERROS
 
-        if (!correctConnections.has(connectionId)) {
+        if (
+            !starsBelongToConstellation ||
+            !correctConnections.has(connectionId)
+        ) {
             totalErrors++;
         }
 
@@ -101,6 +118,8 @@ function calculateResult(constellation, attempts) {
         }
 
     }
+
+    // VERIFICAR CONCLUSÃO
 
     const completed =
         correctConnections.size > 0 &&
@@ -184,7 +203,7 @@ router.get("/constellations", async (request, response) => {
 
 
 // POST /api/campaigns
-// Valida e salva uma campanha.
+// Validar e salvar uma campanha.
 
 router.post("/campaigns", authenticateUser, async (request, response) => {
 
@@ -250,6 +269,16 @@ router.post("/campaigns", authenticateUser, async (request, response) => {
             });
 
         }
+
+        // BUSCAR IDENTIFICADORES DE TODAS AS ESTRELAS CADASTRADAS
+
+        const registeredStars = await Star.find()
+            .select("id")
+            .lean();
+
+        const registeredStarIds = new Set(
+            registeredStars.map(star => star.id)
+        );
 
         // VALIDAR E RECALCULAR CADA RESULTADO
 
@@ -335,8 +364,11 @@ router.post("/campaigns", authenticateUser, async (request, response) => {
 
             const calculated = calculateResult(
                 constellation,
-                result.attempts
+                result.attempts,
+                registeredStarIds
             );
+
+            // ARMAZENAR RESULTADO VALIDADO
 
             verifiedResults.push({
 
@@ -399,7 +431,7 @@ router.post("/campaigns", authenticateUser, async (request, response) => {
 
         if (
             error.message === "Tentativa de conexão inválida." ||
-            error.message === "Estrela não pertence à constelação." ||
+            error.message === "Estrela não encontrada." ||
             error.message === "Conexão duplicada."
         ) {
 
@@ -411,7 +443,7 @@ router.post("/campaigns", authenticateUser, async (request, response) => {
 
         console.error("Erro ao salvar campanha:", error);
 
-        response.status(500).json({
+        return response.status(500).json({
             error: "Não foi possível salvar a campanha."
         });
 
@@ -420,7 +452,241 @@ router.post("/campaigns", authenticateUser, async (request, response) => {
 });
 
 
+// POST /api/profile
+// Registrar perfil do jogador.
+
+router.post("/profile", authenticateUser, async (request, response) => {
+
+    try {
+
+        const nickname = request.body?.nickname;
+
+        // VALIDAR A ENTRADA
+
+        if (typeof nickname !== "string") {
+
+            return response.status(400).json({
+                error: "Informe um apelido válido."
+            });
+
+        }
+
+        const normalizedNickname = nickname
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+
+        const cleanNickname = nickname
+            .replace(/\s+/g, " ")
+            .trim();
+
+        // VALIDAR TAMANHO E CARACTERES
+        // Permite letras, números, espaços e underline.
+
+        if (
+            cleanNickname.length < 2 ||
+            cleanNickname.length > 16 ||
+            !/^[\p{L}\p{N}_ ]+$/u.test(cleanNickname)
+        ) {
+
+            return response.status(400).json({
+                error: "O apelido deve ter entre 2 e 16 caracteres e utilizar apenas letras, números, espaços ou underline."
+            });
+
+        }
+
+        // VERIFICAR SE O JOGADOR JÁ POSSUI PERFIL
+
+        const existingUser = await User.findOne({
+            userId: request.user.uid
+        });
+
+        if (existingUser) {
+
+            return response.json({
+                message: "Perfil já cadastrado.",
+                profile: {
+                    nickname: existingUser.nickname
+                }
+            });
+
+        }
+
+        // CRIAR PERFIL
+
+        const user = await User.create({
+
+            userId: request.user.uid,
+            nickname: cleanNickname,
+            normalizedNickname
+
+        });
+
+        return response.status(201).json({
+
+            message: "Perfil criado com sucesso.",
+
+            profile: {
+                nickname: user.nickname
+            }
+
+        });
+
+    } catch (error) {
+
+        // APELIDO JÁ UTILIZADO
+
+        if (error.code === 11000) {
+
+            return response.status(409).json({
+                error: "Este apelido já está sendo utilizado."
+            });
+
+        }
+
+        console.error("Erro ao criar perfil:", error);
+
+        return response.status(500).json({
+            error: "Não foi possível criar o perfil."
+        });
+
+    }
+
+});
+
+
+// GET /api/profile
+// Consultar perfil do jogador autenticado.
+
+router.get("/profile", authenticateUser, async (request, response) => {
+
+    try {
+
+        const user = await User.findOne({
+            userId: request.user.uid
+        })
+        .select("nickname")
+        .lean();
+
+        if (!user) {
+
+            return response.status(404).json({
+                error: "Perfil não encontrado."
+            });
+
+        }
+
+        return response.json({
+            profile: {
+                nickname: user.nickname
+            }
+        });
+
+    } catch (error) {
+
+        console.error("Erro ao buscar perfil:", error);
+
+        return response.status(500).json({
+            error: "Não foi possível buscar o perfil."
+        });
+
+    }
+
+});
+
+
+// GET /api/ranking
+// Consultar o ranking público dos jogadores.
+
+router.get("/ranking", async (request, response) => {
+
+    try {
+
+        // BUSCAR A MELHOR CAMPANHA DE CADA JOGADOR
+
+        const bestCampaigns = await Campaign.aggregate([
+
+            {
+                $sort: {
+                    totalScore: -1,
+                    createdAt: -1
+                }
+            },
+
+            {
+                $group: {
+                    _id: "$userId",
+                    totalScore: {
+                        $first: "$totalScore"
+                    }
+                }
+            },
+
+            // ASSOCIAR À COLEÇÃO DE USUÁRIOS
+
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "_id",
+                    foreignField: "userId",
+                    as: "user"
+                }
+            },
+
+            // IGNORAR JOGADORES SEM PERFIL
+
+            {
+                $unwind: "$user"
+            },
+
+            // RETORNAR SOMENTE DADOS PÚBLICOS
+
+            {
+                $project: {
+                    _id: 0,
+                    nickname: "$user.nickname",
+                    score: "$totalScore"
+                }
+            },
+
+            // ORDENAR PONTUAÇÕES
+
+            {
+                $sort: {
+                    score: -1,
+                    nickname: 1
+                }
+            }
+
+        ]);
+
+        // ADICIONAR POSIÇÃO NO RANKING
+
+        const ranking = bestCampaigns.map((player, index) => ({
+            position: index + 1,
+            nickname: player.nickname,
+            score: player.score
+        }));
+
+        return response.json({
+            ranking
+        });
+
+    } catch (error) {
+
+        console.error("Erro ao buscar ranking:", error);
+
+        return response.status(500).json({
+            error: "Não foi possível carregar o ranking."
+        });
+
+    }
+
+});
+
+
 // GET /api/session
+// Verificar sessão autenticada.
 
 router.get("/session", authenticateUser, (request, response) => {
 
@@ -430,5 +696,21 @@ router.get("/session", authenticateUser, (request, response) => {
     });
 
 });
+
+
+// EXIBIR ROTAS REGISTRADAS
+
+console.log(
+    "ROTAS REGISTRADAS:",
+    router.stack
+        .filter(layer => layer.route)
+        .map(layer => ({
+            path: layer.route.path,
+            methods: Object.keys(layer.route.methods)
+        }))
+);
+
+
+// EXPORTAR ROTAS
 
 module.exports = router;
