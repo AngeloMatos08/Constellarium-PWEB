@@ -8,10 +8,11 @@ import { createGame } from "./game.js";
 import { createTelescope } from "./telescope.js";
 import { createBackgroundStars } from "./background-stars.js";
 import { createChallengeStars } from "./challenge-stars.js";
+import { createShootingStars } from "./shooting-stars.js";
 
 const game = createGame();
 const telescope = createTelescope();
-
+const shootingStars = createShootingStars();
 game.setBackgroundStars(
     createBackgroundStars(2500)
 );
@@ -258,6 +259,8 @@ const projectedPositions = new Map();
 let logicalWidth = 1;
 let logicalHeight = 1;
 
+let previousSkyFrame = null;
+let nextShootingStar = 0;
 // ESTRELA SOB O CURSOR
 
 let hoveredStar = null;
@@ -328,7 +331,8 @@ function drawGame() {
         game.getState().selectedStar,
         logicalWidth,
         logicalHeight,
-        hoveredStar
+        hoveredStar,
+        shootingStars.getStars()
     );
 
 }
@@ -581,6 +585,58 @@ canvas.addEventListener(
 window.addEventListener("resize", resizeCanvas);
 
 resizeCanvas();
+// ANIMAÇÃO CONTÍNUA DO CÉU
+
+
+function animateSky(timestamp) {
+
+    // CALCULAR O TEMPO ENTRE OS QUADROS
+
+    if (previousSkyFrame === null) {
+        previousSkyFrame = timestamp;
+    }
+
+    const deltaTime = Math.min(
+        (timestamp - previousSkyFrame) / 1000,
+        0.05
+    );
+
+    previousSkyFrame = timestamp;
+
+
+    // CONTROLAR O INTERVALO DAS ESTRELAS CADENTES
+
+    if (timestamp >= nextShootingStar) {
+
+        shootingStars.spawn(
+            logicalWidth,
+            logicalHeight
+        );
+
+        nextShootingStar =
+            timestamp + 8000 + Math.random() * 15000;
+
+    }
+
+
+    // ATUALIZAR MOVIMENTO
+
+    shootingStars.update(
+        deltaTime,
+        logicalWidth,
+        logicalHeight
+    );
+
+
+    // REDESENHAR O CÉU
+
+    drawGame();
+
+    requestAnimationFrame(animateSky);
+
+}
+
+requestAnimationFrame(animateSky);
 
 
 // INICIALIZAÇÃO DO JOGO

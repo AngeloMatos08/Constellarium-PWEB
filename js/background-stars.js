@@ -48,7 +48,13 @@ export function createBackgroundStars(quantity = 2500) {
         // Intensidade individual do brilho.
 
         const glow = 0.1 + random() * 0.5;
+        // ESTRELAS DE DESTAQUE
 
+        const isHighlighted =
+            random() < 0.025;
+
+        const highlightMultiplier =
+            isHighlighted ? 2.5 : 1;
         stars.push({
 
             id: `background-${i}`,
@@ -63,10 +69,20 @@ export function createBackgroundStars(quantity = 2500) {
 
             // Propriedades visuais.
 
-            radius,
-            opacity,
+            radius: radius * highlightMultiplier,
+
+            opacity: isHighlighted
+                ? Math.min(1, opacity * 1.3)
+                : opacity,
+
             color,
-            glow
+
+            glow: glow * highlightMultiplier,
+
+            highlighted: isHighlighted,
+
+            twinkleSpeed: 0.8 + random() * 2.2,
+            twinklePhase: random() * Math.PI * 2
 
         });
 
