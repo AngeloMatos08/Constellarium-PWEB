@@ -1,70 +1,59 @@
 
 {
-    "constellations": [
+  "constellations": [
+    {
+      "id": "orion",
+      "name": "Órion",
+      "difficulty": 1,
+      "center": {
+        "ra": 5.585639,
+        "dec": 0.299167
+      },
+      "stars": [
         {
-            "id": "test-constellation",
-            "name": "Constelação de Teste",
-            "difficulty": 1,
-            "stars": [
-                {
-                    "id": 1,
-                    "ra": 0,
-                    "dec": 0,
-                    "diagram": { "x": 0.18, "y": 0.68 }
-                },
-                {
-                    "id": 2,
-                    "ra": 0.05,
-                    "dec": 1,
-                    "diagram": { "x": 0.5, "y": 0.28 }
-                },
-                {
-                    "id": 0,
-                    "ra": 23.95,
-                    "dec": -1,
-                    "diagram": { "x": 0.82, "y": 0.68 }
-                }
-            ],
-            "connections": [
-                [0, 1],
-                [1, 2]
-            ]
+          "id": "meissa",
+          "diagram": { "x": 0.5, "y": 0.08 }
         },
         {
-            "id": "second-constellation",
-            "name": "Segunda Constelação",
-            "difficulty": 2,
-            "stars": [
-                {
-                    "id": 0,
-                    "ra": 0,
-                    "dec": 0,
-                    "diagram": { "x": 0.22, "y": 0.28 }
-                },
-                {
-                    "id": 1,
-                    "ra": 0.1,
-                    "dec": 1,
-                    "diagram": { "x": 0.52, "y": 0.2 }
-                },
-                {
-                    "id": 2,
-                    "ra": 0.2,
-                    "dec": 0,
-                    "diagram": { "x": 0.76, "y": 0.48 }
-                },
-                {
-                    "id": 3,
-                    "ra": 0.15,
-                    "dec": -2,
-                    "diagram": { "x": 0.46, "y": 0.78 }
-                }
-            ],
-            "connections": [
-                [0, 1],
-                [1, 2],
-                [2, 3]
-            ]
+          "id": "betelgeuse",
+          "diagram": { "x": 0.25, "y": 0.25 }
+        },
+        {
+          "id": "bellatrix",
+          "diagram": { "x": 0.75, "y": 0.28 }
+        },
+        {
+          "id": "mintaka",
+          "diagram": { "x": 0.65, "y": 0.53 }
+        },
+        {
+          "id": "alnilam",
+          "diagram": { "x": 0.51, "y": 0.57 }
+        },
+        {
+          "id": "alnitak",
+          "diagram": { "x": 0.37, "y": 0.61 }
+        },
+        {
+          "id": "saiph",
+          "diagram": { "x": 0.25, "y": 0.88 }
+        },
+        {
+          "id": "rigel",
+          "diagram": { "x": 0.77, "y": 0.85 }
         }
-    ]
+      ],
+      "connections": [
+        ["betelgeuse", "meissa"],
+        ["meissa", "bellatrix"],
+        ["bellatrix", "mintaka"],
+        ["mintaka", "alnilam"],
+        ["alnilam", "alnitak"],
+        ["alnitak", "saiph"],
+        ["saiph", "rigel"],
+        ["rigel", "mintaka"],
+        ["betelgeuse", "alnitak"]
+      ]
+    }
+  ]
 }

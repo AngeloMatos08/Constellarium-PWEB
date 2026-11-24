@@ -1,57 +1,68 @@
+
 export function createTelescope() {
 
-    // RA é armazenada em minutos.
-    // 24 horas = 1440 minutos.
+    // Ascensão reta em minutos (0 a 1439).
     let ra = 0;
 
-    // DEC é armazenada em graus.
-    // Limites: -90° até +90°.
+    // Declinação em graus (-90 a +90).
     let dec = 0;
 
+    // Campo de visão em graus.
+    let fieldOfView = 25;
 
-    // ALTERAR ASCENSÃO RETA
+    const MIN_FIELD_OF_VIEW = 2;
+    const MAX_FIELD_OF_VIEW = 40;
+    const ZOOM_FACTOR = 1.25;
 
+    // Altera a ascensão reta.
     function changeRA(minutes) {
-
-        ra += minutes;
-
-        // Mantém RA entre 0h e 24h.
-        const totalMinutes = 24 * 60;
+        const totalMinutes = 1440;
 
         ra =
-            ((ra % totalMinutes) + totalMinutes) %
+            ((ra + minutes) % totalMinutes + totalMinutes) %
             totalMinutes;
     }
 
-
-    // ALTERAR DECLINAÇÃO
-
+    // Altera a declinação.
     function changeDEC(degrees) {
-
         dec += degrees;
 
-        // Mantém DEC entre -90° e +90°.
         dec = Math.max(
             -90,
             Math.min(90, dec)
         );
     }
 
-
-    // OBTER POSIÇÃO ATUAL
-
-    function getPosition() {
-
-        return {
-            ra,
-            dec
-        };
+    // Aproxima o campo de visão.
+    function zoomIn() {
+        fieldOfView = Math.max(
+            MIN_FIELD_OF_VIEW,
+            fieldOfView / ZOOM_FACTOR
+        );
     }
 
+    // Afasta o campo de visão.
+    function zoomOut() {
+        fieldOfView = Math.min(
+            MAX_FIELD_OF_VIEW,
+            fieldOfView * ZOOM_FACTOR
+        );
+    }
+
+    // Retorna o estado atual do telescópio.
+    function getPosition() {
+        return {
+            ra,
+            dec,
+            fieldOfView
+        };
+    }
 
     return {
         changeRA,
         changeDEC,
+        zoomIn,
+        zoomOut,
         getPosition
     };
 }

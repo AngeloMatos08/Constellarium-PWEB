@@ -1,3 +1,4 @@
+
 import { loadConstellations } from "./constellation.js";
 import { createRenderer } from "./renderer.js";
 import { createReferenceRenderer } from "./reference-renderer.js";
@@ -5,13 +6,28 @@ import { projectStar } from "./projection.js";
 import { validateConstellation } from "./validator.js";
 import { createGame } from "./game.js";
 import { createTelescope } from "./telescope.js";
+import { createBackgroundStars } from "./background-stars.js";
+import { createChallengeStars } from "./challenge-stars.js";
+
 const game = createGame();
 const telescope = createTelescope();
+
+game.setBackgroundStars(
+    createBackgroundStars(2500)
+);
+console.log(
+    "Estrelas decorativas:",
+    game.getState().backgroundStars.slice(0, 5)
+);
+game.setChallengeStars(
+    createChallengeStars(150)
+);
 
 console.log("Jogo Iniciado");
 console.log(game.getState());
 
 // ELEMENTOS DO DOM
+
 const resultScreen =
     document.getElementById("result-screen");
 
@@ -23,21 +39,32 @@ const resultMessage =
 
 const continueButton =
     document.getElementById("continue-button");
+
 const constellationName =
     document.getElementById("constellation-name");
+
 const referenceDiagram =
     document.getElementById("constellation-diagram");
 
+const constellationRA =
+    document.getElementById("constellation-ra");
+
+const constellationDEC =
+    document.getElementById("constellation-dec");
+
 // CANVAS
+
 const canvas = document.getElementById("sky");
 const ctx = canvas.getContext("2d");
 
+const finishButton =
+    document.getElementById("finish-button");
 
-const finishButton = document.getElementById("finish-button");
-const resetButton = document.getElementById("reset-button");
-
+const resetButton =
+    document.getElementById("reset-button");
 
 // BOTÕES DE CONTROLE DO TELESCÓPIO
+
 const raLeftButton =
     document.getElementById("ra-left");
 
@@ -56,33 +83,50 @@ const raValue =
 const decValue =
     document.getElementById("dec-value");
 
+const zoomInButton =
+    document.getElementById("zoom-in");
+
+const zoomOutButton =
+    document.getElementById("zoom-out");
+
+const zoomValue =
+    document.getElementById("zoom-value");
 
 
-// FUNÇÃO CONVERTER MINUTOS EM HORAS/MINUTOS
+// FORMATAR ASCENSÃO RETA
+
 function formatRA(totalMinutes) {
 
-    const hours =
-        Math.floor(totalMinutes / 60);
+    const roundedMinutes =
+        ((Math.round(totalMinutes) % 1440) + 1440) % 1440;
 
-    const minutes =
-        totalMinutes % 60;
+    const hours = Math.floor(roundedMinutes / 60);
+    const minutes = roundedMinutes % 60;
 
     return `${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m`;
 }
 
-// FUNÇAO DECLINAÇÃO
+
+// FORMATAR DECLINAÇÃO
+
 function formatDEC(degrees) {
 
-    const signal =
-        degrees >= 0 ? "+" : "-";
+    const totalArcminutes =
+        Math.round(Math.abs(degrees) * 60);
 
     const absoluteDegrees =
-        Math.abs(degrees);
+        Math.floor(totalArcminutes / 60);
 
-    return `${signal}${String(absoluteDegrees).padStart(2, "0")}° 00'`;
+    const minutes = totalArcminutes % 60;
+
+    const signal = degrees >= 0 ? "+" : "-";
+
+    return `${signal}${String(absoluteDegrees).padStart(2, "0")}° ${String(minutes).padStart(2, "0")}′`;
 }
 
-// FUNCÇÃO QUE LOCALIZA A POSIÇÃO ATUAL DO TELESCOPIO
+
+// ATUALIZAR INTERFACE DO TELESCÓPIO
+
 function updateTelescopeUI() {
 
     const position =
@@ -93,61 +137,145 @@ function updateTelescopeUI() {
 
     decValue.textContent =
         formatDEC(position.dec);
+
+    zoomValue.textContent =
+        `${position.fieldOfView.toFixed(1)}°`;
 }
 
 
-// BOTÕES
-raLeftButton.addEventListener(
-    "click",
-    () => {
-        telescope.changeRA(-1);
-        updateTelescopeUI();
-        drawGame();
-    }
-);
+// MOVIMENTAÇÃO CONTÍNUA DO TELESCÓPIO
 
-raRightButton.addEventListener(
-    "click",
-    () => {
-        telescope.changeRA(1);
-        updateTelescopeUI();
-        drawGame();
-    }
-);
+const RA_MOVEMENT_SPEED = 10;
+const DEC_MOVEMENT_SPEED = 2;
 
-decDownButton.addEventListener(
-    "click",
-    () => {
-        telescope.changeDEC(-1);
-        updateTelescopeUI();
-        drawGame();
-    }
-);
+let activeMovement = null;
+let animationFrameId = null;
+let previousFrameTime = null;
 
-decUpButton.addEventListener(
-    "click",
-    () => {
-        telescope.changeDEC(1);
-        updateTelescopeUI();
-        drawGame();
+function startTelescopeMovement(axis, direction, event) {
+
+    event.preventDefault();
+
+    if (activeMovement) return;
+
+    activeMovement = { axis, direction };
+    previousFrameTime = null;
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+
+    animationFrameId =
+        requestAnimationFrame(updateTelescopeMovement);
+}
+
+function updateTelescopeMovement(timestamp) {
+
+    if (!activeMovement) return;
+
+    if (previousFrameTime === null) {
+        previousFrameTime = timestamp;
     }
-);
+
+    const deltaTime = Math.min(
+        (timestamp - previousFrameTime) / 1000,
+        0.05
+    );
+
+    previousFrameTime = timestamp;
+
+    const { axis, direction } = activeMovement;
+
+    if (axis === "ra") {
+
+        telescope.changeRA(
+            direction * RA_MOVEMENT_SPEED * deltaTime
+        );
+
+    } else {
+
+        telescope.changeDEC(
+            direction * DEC_MOVEMENT_SPEED * deltaTime
+        );
+
+    }
+
+    updateTelescopeUI();
+    drawGame();
+
+    animationFrameId =
+        requestAnimationFrame(updateTelescopeMovement);
+}
+
+function stopTelescopeMovement() {
+
+    activeMovement = null;
+    previousFrameTime = null;
+
+    if (animationFrameId !== null) {
+
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+
+    }
+}
+
+
+// EVENTOS DOS BOTÕES DE MOVIMENTAÇÃO
+
+raLeftButton.addEventListener("pointerdown", event => {
+    startTelescopeMovement("ra", -1, event);
+});
+
+raRightButton.addEventListener("pointerdown", event => {
+    startTelescopeMovement("ra", 1, event);
+});
+
+decDownButton.addEventListener("pointerdown", event => {
+    startTelescopeMovement("dec", -1, event);
+});
+
+decUpButton.addEventListener("pointerdown", event => {
+    startTelescopeMovement("dec", 1, event);
+});
+
+window.addEventListener("pointerup", stopTelescopeMovement);
+window.addEventListener("pointercancel", stopTelescopeMovement);
+window.addEventListener("blur", stopTelescopeMovement);
 
 updateTelescopeUI();
 
+
+// ESTADO E RENDERIZADORES
+
 const state = game.getState();
+
 const renderer = createRenderer(ctx, state);
-const referenceRenderer = createReferenceRenderer(referenceDiagram);
+
+const referenceRenderer =
+    createReferenceRenderer(referenceDiagram);
+
 const projectedPositions = new Map();
+
 let logicalWidth = 1;
 let logicalHeight = 1;
 
+// ESTRELA SOB O CURSOR
+
+let hoveredStar = null;
+
+
+// DESENHAR O CÉU
+
 function drawGame() {
+
     projectedPositions.clear();
 
-    const telescopePosition = telescope.getPosition();
+    const telescopePosition =
+        telescope.getPosition();
+
+    // PROJETAR ESTRELAS REAIS
 
     for (const star of state.stars) {
+
         projectedPositions.set(
             star.id,
             projectStar(
@@ -157,70 +285,149 @@ function drawGame() {
                 logicalHeight
             )
         );
+
     }
+
+
+    // PROJETAR ESTRELAS DECORATIVAS
+
+    for (const star of state.backgroundStars) {
+
+        projectedPositions.set(
+            star.id,
+            projectStar(
+                star,
+                telescopePosition,
+                logicalWidth,
+                logicalHeight
+            )
+        );
+
+    }
+
+
+    // PROJETAR ESTRELAS DE DESAFIO
+
+    for (const star of state.challengeStars) {
+
+        projectedPositions.set(
+            star.id,
+            projectStar(
+                star,
+                telescopePosition,
+                logicalWidth,
+                logicalHeight
+            )
+        );
+
+    }
+
 
     renderer.draw(
         projectedPositions,
-        game.getState().selectedStar
+        game.getState().selectedStar,
+        logicalWidth,
+        logicalHeight,
+        hoveredStar
     );
+
 }
 
+
+// CONTROLE DE ZOOM
+
+zoomInButton.addEventListener("click", () => {
+
+    telescope.zoomIn();
+
+    updateTelescopeUI();
+    drawGame();
+
+});
+
+zoomOutButton.addEventListener("click", () => {
+
+    telescope.zoomOut();
+
+    updateTelescopeUI();
+    drawGame();
+
+});
+
+
+// REDIMENSIONAR CANVAS
+
 function resizeCanvas() {
+
     const rect = canvas.getBoundingClientRect();
     const styles = getComputedStyle(canvas);
-    const borderLeft = parseFloat(styles.borderLeftWidth) || 0;
-    const borderRight = parseFloat(styles.borderRightWidth) || 0;
-    const borderTop = parseFloat(styles.borderTopWidth) || 0;
-    const borderBottom = parseFloat(styles.borderBottomWidth) || 0;
-    const contentWidth = rect.width - borderLeft - borderRight;
-    const contentHeight = rect.height - borderTop - borderBottom;
+
+    const borderLeft =
+        parseFloat(styles.borderLeftWidth) || 0;
+
+    const borderRight =
+        parseFloat(styles.borderRightWidth) || 0;
+
+    const borderTop =
+        parseFloat(styles.borderTopWidth) || 0;
+
+    const borderBottom =
+        parseFloat(styles.borderBottomWidth) || 0;
+
+    const contentWidth =
+        rect.width - borderLeft - borderRight;
+
+    const contentHeight =
+        rect.height - borderTop - borderBottom;
 
     const logicalSize = Math.max(
         1,
         Math.round(Math.min(contentWidth, contentHeight))
     );
+
     logicalWidth = logicalSize;
     logicalHeight = logicalSize;
 
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-    const bitmapSize = Math.round(logicalSize * pixelRatio);
+    const pixelRatio =
+        Math.min(window.devicePixelRatio || 1, 2);
 
-    if (canvas.width !== bitmapSize || canvas.height !== bitmapSize) {
-        canvas.width = bitmapSize;
-        canvas.height = bitmapSize;
-    }
-
-    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-    drawGame();
-}
-
-// CLIQUE / TOQUE NAS ESTRELAS
-function handlePointerDown(event) {
-    const rect = canvas.getBoundingClientRect();
-    const styles = getComputedStyle(canvas);
-    const borderLeft = parseFloat(styles.borderLeftWidth) || 0;
-    const borderRight = parseFloat(styles.borderRightWidth) || 0;
-    const borderTop = parseFloat(styles.borderTopWidth) || 0;
-    const borderBottom = parseFloat(styles.borderBottomWidth) || 0;
-    const contentWidth = rect.width - borderLeft - borderRight;
-    const contentHeight = rect.height - borderTop - borderBottom;
-    const localX = event.clientX - rect.left - borderLeft;
-    const localY = event.clientY - rect.top - borderTop;
+    const bitmapSize =
+        Math.round(logicalSize * pixelRatio);
 
     if (
-        localX < 0 || localX > contentWidth ||
-        localY < 0 || localY > contentHeight
+        canvas.width !== bitmapSize ||
+        canvas.height !== bitmapSize
     ) {
-        return;
+
+        canvas.width = bitmapSize;
+        canvas.height = bitmapSize;
+
     }
 
-    const clickX = localX * logicalWidth / contentWidth;
-    const clickY = localY * logicalHeight / contentHeight;
+    ctx.setTransform(
+        pixelRatio,
+        0,
+        0,
+        pixelRatio,
+        0,
+        0
+    );
+
+    drawGame();
+
+}
+
+
+// LOCALIZAR ESTRELA NA POSIÇÃO DO PONTEIRO
+
+function findStarAtPosition(x, y) {
 
     const clickRadius = 15;
 
-    for (const star of state.stars) {
-        const position = projectedPositions.get(star.id);
+    for (const star of [...state.stars, ...state.challengeStars]) {
+
+        const position =
+            projectedPositions.get(star.id);
 
         if (
             !position?.visible ||
@@ -231,48 +438,192 @@ function handlePointerDown(event) {
         }
 
         const distance = Math.sqrt(
-            (clickX - position.x) ** 2 +
-            (clickY - position.y) ** 2
+            (x - position.x) ** 2 +
+            (y - position.y) ** 2
         );
 
         if (distance <= clickRadius) {
-            game.selectStar(star.id);
-            renderer.draw(
-                projectedPositions,
-                game.getState().selectedStar
-            );
-            break;
+            return star;
         }
+
     }
+
+    return null;
+
 }
+
+
+// CONVERTER POSIÇÃO DO PONTEIRO PARA O CANVAS
+
+function getCanvasCoordinates(event) {
+
+    const rect = canvas.getBoundingClientRect();
+    const styles = getComputedStyle(canvas);
+
+    const borderLeft =
+        parseFloat(styles.borderLeftWidth) || 0;
+
+    const borderRight =
+        parseFloat(styles.borderRightWidth) || 0;
+
+    const borderTop =
+        parseFloat(styles.borderTopWidth) || 0;
+
+    const borderBottom =
+        parseFloat(styles.borderBottomWidth) || 0;
+
+    const contentWidth =
+        rect.width - borderLeft - borderRight;
+
+    const contentHeight =
+        rect.height - borderTop - borderBottom;
+
+    const localX =
+        event.clientX - rect.left - borderLeft;
+
+    const localY =
+        event.clientY - rect.top - borderTop;
+
+    if (
+        localX < 0 || localX > contentWidth ||
+        localY < 0 || localY > contentHeight
+    ) {
+        return null;
+    }
+
+    return {
+        x: localX * logicalWidth / contentWidth,
+        y: localY * logicalHeight / contentHeight
+    };
+
+}
+
+
+// CLIQUE / TOQUE NAS ESTRELAS
+
+function handlePointerDown(event) {
+
+    const coordinates =
+        getCanvasCoordinates(event);
+
+    if (!coordinates) return;
+
+    const star = findStarAtPosition(
+        coordinates.x,
+        coordinates.y
+    );
+
+    if (star) {
+
+        game.selectStar(star.id);
+        drawGame();
+
+    }
+
+}
+
+
+// IDENTIFICAÇÃO AO PASSAR O MOUSE
+
+function handlePointerMove(event) {
+
+    if (event.pointerType !== "mouse") return;
+
+    const coordinates =
+        getCanvasCoordinates(event);
+
+    const star = coordinates
+        ? findStarAtPosition(
+            coordinates.x,
+            coordinates.y
+        )
+        : null;
+
+    const newHoveredStar =
+        star?.id ?? null;
+
+    if (hoveredStar !== newHoveredStar) {
+
+        hoveredStar = newHoveredStar;
+        drawGame();
+
+    }
+
+}
+
+
+// EVENTOS DO CANVAS
 
 canvas.addEventListener(
     "pointerdown",
     handlePointerDown
 );
 
+canvas.addEventListener(
+    "pointermove",
+    handlePointerMove
+);
+
+canvas.addEventListener(
+    "pointerleave",
+    () => {
+
+        if (hoveredStar !== null) {
+
+            hoveredStar = null;
+            drawGame();
+
+        }
+
+    }
+);
+
 window.addEventListener("resize", resizeCanvas);
+
 resizeCanvas();
 
+
 // INICIALIZAÇÃO DO JOGO
+
 async function startGame() {
+
     try {
+
         const data =
             await loadConstellations();
 
-        game.setConstellations(data);
+        console.log("Dados carregados:", data);
+        console.log("Estrelas do céu:", data.stars);
+        console.log("Constelações:", data.constellations);
+
+        game.setConstellations(
+            data.constellations
+        );
+
+        game.setSkyStars(
+            data.stars
+        );
+
         nextConstellation();
+
     } catch (error) {
+
         console.error(
             "Erro ao iniciar o jogo:",
             error
         );
+
     }
+
 }
 
 startGame();
 
+
+// PRÓXIMA CONSTELAÇÃO
+
 function nextConstellation() {
+
     const state =
         game.getState();
 
@@ -289,17 +640,45 @@ function nextConstellation() {
         currentConstellation
     );
 
-    constellationName.textContent = currentConstellation.name;
+    constellationName.textContent =
+        currentConstellation.name;
+
+    // ATUALIZAR COORDENADAS DA CONSTELAÇÃO
+
+    if (currentConstellation.center) {
+
+        constellationRA.textContent =
+            `RA central: ${formatRA(currentConstellation.center.ra * 60)}`;
+
+        constellationDEC.textContent =
+            `DEC central: ${formatDEC(currentConstellation.center.dec)}`;
+
+    } else {
+
+        constellationRA.textContent =
+            "RA central: não informada";
+
+        constellationDEC.textContent =
+            "DEC central: não informada";
+
+    }
+
     referenceRenderer.render(currentConstellation);
+
     drawGame();
 
     console.log(
         "Nova constelação:",
         currentConstellation.name
     );
+
 }
 
+
+// FINALIZAR JOGO
+
 function finishGame() {
+
     const state =
         game.getState();
 
@@ -310,7 +689,11 @@ function finishGame() {
         );
 
     showResult(result);
+
 }
+
+
+// REINICIAR JOGO
 
 function resetGame() {
 
@@ -320,28 +703,46 @@ function resetGame() {
 
 }
 
+
+// EXIBIR RESULTADO
+
 function showResult(isCorrect) {
+
     resultScreen.classList.remove("hidden");
 
     if (isCorrect) {
+
         resultTitle.textContent =
             "Correta";
 
         resultMessage.textContent =
             "Você encontrou a constelação.";
+
     } else {
+
         resultTitle.textContent =
             "Errado";
 
         resultMessage.textContent =
             "As conexões não correspondem à constelação.";
+
     }
+
 }
 
+
+// CONTINUAR JOGO
+
 function continueGame() {
+
     resultScreen.classList.add("hidden");
+
     nextConstellation();
+
 }
+
+
+// EVENTOS DOS BOTÕES DO JOGO
 
 finishButton.addEventListener(
     "click",
@@ -357,4 +758,3 @@ continueButton.addEventListener(
     "click",
     continueGame
 );
-

@@ -1,3 +1,8 @@
+
+/* ========================================
+   CONFIGURAÇÕES GERAIS
+======================================== */
+
 * {
     margin: 0;
     padding: 0;
@@ -10,22 +15,51 @@ body {
     font-family: "Manrope", "Trebuchet MS", sans-serif;
 }
 
+/* ========================================
+   LAYOUT PRINCIPAL
+======================================== */
+
 #game {
-    width: 100%;
-    min-height: calc(100vh - 78px);
+    width: min(100%, 1600px);
+    min-height: calc(100svh - 78px);
+    margin-inline: auto;
+    padding: clamp(20px, 3vw, 48px);
 
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+
+    grid-template-columns:
+        minmax(230px, 280px)
+        minmax(0, 1fr)
+        minmax(230px, 280px);
 
     align-items: center;
+    gap: clamp(20px, 3vw, 48px);
 }
+
+/* ========================================
+   IDENTIFICAÇÃO DA MISSÃO
+======================================== */
 
 .game-kicker {
     margin-bottom: 10px;
+
     color: #82d7c9;
+
     font-family: "DM Mono", "Courier New", monospace;
     font-size: 10px;
     letter-spacing: 0.08em;
+}
+
+#constellation-info {
+    min-width: 0;
+    width: 100%;
+    height: auto;
+    padding: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
 }
 
 #constellation-info h1 {
@@ -41,21 +75,16 @@ body {
 
 #constellation-info p:not(.game-kicker) {
     margin-block: 5px;
+
     color: #a4b2ae;
+
     font-family: "DM Mono", "Courier New", monospace;
     font-size: 12px;
 }
-/* PAINEL DA CONSTELAÇÃO */
 
-#constellation-info {
-    min-width: 0;
-    height: 100%;
-    padding: 32px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 8px;
-}
+/* ========================================
+   PAINEL DE REFERÊNCIA
+======================================== */
 
 #reference-panel {
     display: flex;
@@ -66,15 +95,19 @@ body {
 
 .panel-label {
     color: #82d7c9;
+
     font-family: "DM Mono", "Courier New", monospace;
     font-size: 10px;
 }
 
 #constellation-diagram {
     display: block;
+
     width: min(100%, 230px);
     aspect-ratio: 1;
+
     align-self: center;
+
     overflow: visible;
     color: #e9eeea;
 }
@@ -98,6 +131,7 @@ body {
 .reference-details h3,
 .reference-curiosities h3 {
     margin-bottom: 6px;
+
     color: #d6dfd9;
     font-size: 12px;
     font-weight: 700;
@@ -108,9 +142,14 @@ body {
     font-size: 12px;
 }
 
-/* TELESCÓPIO */
+/* ========================================
+   TELESCÓPIO
+======================================== */
 
 #telescope {
+    min-width: 0;
+    width: 100%;
+
     display: flex;
     justify-content: center;
     align-items: center;
@@ -118,47 +157,65 @@ body {
 
 .telescope-optics {
     position: relative;
-    width: min(50vw, 600px);
+
+    width: min(100%, 620px);
     aspect-ratio: 1;
+
+    flex-shrink: 0;
 }
 
 #sky {
     display: block;
+
     width: 100%;
     height: 100%;
+
     border: 2px solid white;
     border-radius: 50%;
+
     background-color: #000;
 }
 
 .telescope-frame {
     position: absolute;
     z-index: 1;
+
     inset: -12px;
+
     pointer-events: none;
+
     background-image: var(--telescope-frame-image, none);
     background-position: center;
     background-repeat: no-repeat;
     background-size: 100% 100%;
 }
 
-/* CONTROLES */
+/* ========================================
+   CONTROLES DO TELESCÓPIO
+======================================== */
 
 #controls {
-    height: 100%;
-
-    padding: 40px;
+    min-width: 0;
+    width: 100%;
+    height: auto;
+    padding: 0;
 
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 30px;
+    gap: 24px;
 }
 
 #ra-control,
 #dec-control {
     display: grid;
-    grid-template-columns: 42px 38px minmax(74px, 1fr) 38px;
+
+    grid-template-columns:
+        38px
+        38px
+        minmax(0, 1fr)
+        38px;
+
     align-items: center;
     gap: 7px;
 }
@@ -166,7 +223,9 @@ body {
 #ra-control h2,
 #dec-control h2 {
     margin: 0;
+
     color: #82d7c9;
+
     font-family: "DM Mono", "Courier New", monospace;
     font-size: 13px;
 }
@@ -174,19 +233,30 @@ body {
 #ra-value,
 #dec-value {
     color: #d6dfd9;
+
     font-family: "DM Mono", "Courier New", monospace;
     font-size: 10px;
+
     text-align: center;
     white-space: nowrap;
 }
 
+/* ========================================
+   BOTÕES
+======================================== */
+
 #controls button,
 #continue-button {
     min-height: 38px;
+
     border: 1px solid #34474c;
     background: #0c1822;
     color: #e9eeea;
+
     cursor: pointer;
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease;
 }
 
 #controls button:hover,
@@ -212,13 +282,20 @@ body {
     color: #a4b2ae;
 }
 
+/* ========================================
+   TELA DE RESULTADO
+======================================== */
+
 #result-screen {
     position: fixed;
     z-index: 5;
     inset: 0;
+
     display: grid;
     place-items: center;
+
     padding: 20px;
+
     background: rgba(3, 9, 15, 0.78);
 }
 
@@ -228,7 +305,9 @@ body {
 
 .result-card {
     width: min(420px, 100%);
+
     padding: 32px;
+
     border: 1px solid #34474c;
     background: #0c1822;
 }
@@ -244,37 +323,96 @@ body {
 
 #continue-button {
     padding-inline: 18px;
+
     border-color: #82d7c9;
     background: #82d7c9;
     color: #08201f;
+
     font-weight: 800;
 }
 
+/* ========================================
+   CLASSE UTILITÁRIA
+======================================== */
+
 .hidden {
     display: none;
-
-
 }
-@media (max-width: 900px) {
+
+/* ========================================
+   TABLETS
+======================================== */
+
+@media (max-width: 1100px) {
 
     #game {
-        min-height: calc(100vh - 121px);
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(0, 1.5fr);
 
-        grid-template-columns: 1fr;
+        grid-template-areas:
+            "reference telescope"
+            "controls telescope";
 
-        grid-template-rows: auto auto auto;
-
-        padding: 20px;
-        gap: 20px;
+        gap: 28px;
     }
 
     #constellation-info {
-        height: auto;
+        grid-area: reference;
+    }
 
-        padding: 10px;
+    #telescope {
+        grid-area: telescope;
+    }
 
+    .telescope-optics {
+        width: min(100%, 520px);
+    }
+
+    #controls {
+        grid-area: controls;
+
+        max-width: 380px;
+        justify-self: center;
+    }
+}
+
+/* ========================================
+   CELULARES
+======================================== */
+
+@media (max-width: 700px) {
+
+    #game {
+        min-height: auto;
+
+        padding: 24px 18px 40px;
+
+        grid-template-columns: minmax(0, 1fr);
+
+        grid-template-areas:
+            "reference"
+            "telescope"
+            "controls";
+
+        gap: 28px;
+    }
+
+    #constellation-info {
         align-items: center;
         text-align: center;
+    }
+
+    #constellation-info h2 {
+        margin-bottom: 12px;
+    }
+
+    #reference-panel {
+        width: min(100%, 380px);
+    }
+
+    #constellation-diagram {
+        width: min(70vw, 230px);
     }
 
     #telescope {
@@ -282,18 +420,29 @@ body {
     }
 
     .telescope-optics {
-        width: min(80vw, 400px);
-    }
-
-    #controls {
-        height: auto;
-
-        padding: 10px;
-
-        align-items: center;
+        width: min(82vw, 460px);
     }
 
     #controls {
         width: min(100%, 380px);
+        gap: 18px;
+    }
+
+    #ra-control,
+    #dec-control {
+        grid-template-columns:
+            42px
+            42px
+            minmax(0, 1fr)
+            42px;
+    }
+
+    #controls button {
+        min-height: 44px;
+    }
+
+    #finish-button,
+    #reset-button {
+        width: 100%;
     }
 }

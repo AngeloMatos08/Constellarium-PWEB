@@ -1,10 +1,82 @@
+
 export async function loadConstellations() {
 
-    const response = await fetch("data/constellations.json");
+    const [constellationsResponse, starsResponse] =
+        await Promise.all([
+            fetch("data/constellations.json"),
+            fetch("data/stars.json")
+        ]);
 
-    const data = await response.json();
+    if (
+        !constellationsResponse.ok ||
+        !starsResponse.ok
+    ) {
+        throw new Error(
+            "Erro ao carregar os dados astronômicos."
+        );
+    }
 
-    console.log("Constelações carregadas:", data);
+    const constellationsData =
+        await constellationsResponse.json();
 
-    return data.constellations;
+    const starsData =
+        await starsResponse.json();
+
+    // Cria um catálogo para localizar estrelas pelo ID.
+    const starsById = new Map(
+        starsData.stars.map(star => [
+            star.id,
+            star
+        ])
+    );
+
+    // Relaciona cada estrela da constelação
+    // aos seus dados completos no catálogo.
+    const constellations =
+        constellationsData.constellations.map(
+            constellation => {
+
+                const resolvedStars =
+                    constellation.stars.map(
+                        starReference => {
+
+                            const catalogStar =
+                                starsById.get(
+                                    starReference.id
+                                );
+
+                            if (!catalogStar) {
+                                throw new Error(
+                                    `Estrela não encontrada no catálogo: ${starReference.id}`
+                                );
+                            }
+
+                            return {
+                                ...catalogStar,
+                                diagram: starReference.diagram
+                            };
+                        }
+                    );
+
+                return {
+                    ...constellation,
+                    stars: resolvedStars
+                };
+            }
+        );
+
+    console.log(
+        "Constelações carregadas:",
+        constellations
+    );
+
+    console.log(
+        "Estrelas carregadas:",
+        starsData.stars
+    );
+
+    return {
+        constellations,
+        stars: starsData.stars
+    };
 }

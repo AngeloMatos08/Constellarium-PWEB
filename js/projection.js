@@ -1,7 +1,4 @@
 
-const FIELD_OF_VIEW_RA = 10;
-const FIELD_OF_VIEW_DEC = 10;
-
 // Converte graus para radianos.
 function toRadians(degrees) {
     return degrees * Math.PI / 180;
@@ -21,12 +18,13 @@ function normalizeRA(degrees) {
  * Projeta uma estrela no campo de visão do telescópio.
  *
  * star:
- *   { id, ra } -> RA em horas decimais
+ *   { id, ra }  -> RA em horas decimais
  *   { id, dec } -> DEC em graus
  *
  * telescopePosition:
- *   { ra }  -> RA em minutos
- *   { dec } -> DEC em graus
+ *   { ra }           -> RA em minutos
+ *   { dec }          -> DEC em graus
+ *   { fieldOfView }  -> campo de visão em graus
  *
  * width e height:
  *   dimensões lógicas do Canvas, em pixels.
@@ -37,15 +35,7 @@ export function projectStar(
     width,
     height
 ) {
-    const starRA = toRadians(
-        raHoursToDegrees(star.ra)
-    );
-
     const starDEC = toRadians(star.dec);
-
-    const telescopeRA = toRadians(
-        (telescopePosition.ra / 60) * 15
-    );
 
     const telescopeDEC = toRadians(
         telescopePosition.dec
@@ -94,12 +84,16 @@ export function projectStar(
             Math.cos(deltaRA)
         ) / denominator;
 
+    // Campo de visão dinâmico do telescópio.
+    const fieldOfView =
+        telescopePosition.fieldOfView ?? 10;
+
     const halfWidth = toRadians(
-        FIELD_OF_VIEW_RA / 2
+        fieldOfView / 2
     );
 
     const halfHeight = toRadians(
-        FIELD_OF_VIEW_DEC / 2
+        fieldOfView / 2
     );
 
     // Limites do campo no plano tangente.

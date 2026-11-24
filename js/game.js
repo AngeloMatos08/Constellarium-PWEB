@@ -1,9 +1,18 @@
+
 export function createGame() {
 
     let constellations = [];
     let currentConstellation = null;
 
-    let stars = [];
+    // Catálogo global de estrelas reais.
+    const stars = [];
+
+    // Estrelas decorativas do céu.
+    const backgroundStars = [];
+
+    // Estrelas falsas de desafio.
+    const challengeStars = [];
+
     let connections = [];
     let selectedStar = null;
     let correctConnections = [];
@@ -11,17 +20,10 @@ export function createGame() {
 
     function loadConstellation(constellation) {
 
-        stars.length = 0;
         connections.length = 0;
-
         selectedStar = null;
 
-        currentConstellation =
-            constellation;
-
-        stars.push(
-            ...constellation.stars
-        );
+        currentConstellation = constellation;
 
         correctConnections =
             constellation.connections;
@@ -76,15 +78,49 @@ export function createGame() {
 
         }
     }
-    
+
+
     function setConstellations(data) {
+
         constellations = data;
+
     }
 
+
+    function setSkyStars(data) {
+
+        stars.length = 0;
+
+        stars.push(...data);
+
+    }
+
+
+    function setBackgroundStars(data) {
+
+        backgroundStars.length = 0;
+
+        backgroundStars.push(...data);
+
+    }
+
+
+    function setChallengeStars(data) {
+
+        challengeStars.length = 0;
+
+        challengeStars.push(...data);
+
+    }
+
+
     function reset() {
+
         connections.length = 0;
         selectedStar = null;
+
     }
+
 
     return {
 
@@ -94,6 +130,8 @@ export function createGame() {
                 constellations,
                 currentConstellation,
                 stars,
+                backgroundStars,
+                challengeStars,
                 connections,
                 selectedStar,
                 correctConnections
@@ -103,8 +141,12 @@ export function createGame() {
 
         loadConstellation,
         selectStar,
+        setBackgroundStars,
+        setChallengeStars,
         setConstellations,
+        setSkyStars,
         reset
 
     };
+
 }

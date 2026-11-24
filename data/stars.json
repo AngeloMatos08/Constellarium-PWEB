@@ -1,0 +1,69 @@
+
+{
+  "stars": [
+    {
+      "id": "meissa",
+      "name": "Meissa",
+      "ra": 5.585639,
+      "dec": 9.934167,
+      "magnitude": 3.3,
+      "color": "#c7ddff"
+    },
+    {
+      "id": "betelgeuse",
+      "name": "Betelgeuse",
+      "ra": 5.919528,
+      "dec": 7.406944,
+      "magnitude": 0.5,
+      "color": "#ffad80"
+    },
+    {
+      "id": "bellatrix",
+      "name": "Bellatrix",
+      "ra": 5.418851,
+      "dec": 6.349722,
+      "magnitude": 1.6,
+      "color": "#c4d9ff"
+    },
+    {
+      "id": "mintaka",
+      "name": "Mintaka",
+      "ra": 5.533444,
+      "dec": -0.299167,
+      "magnitude": 2.2,
+      "color": "#c4d9ff"
+    },
+    {
+      "id": "alnilam",
+      "name": "Alnilam",
+      "ra": 5.603559,
+      "dec": -1.201917,
+      "magnitude": 1.7,
+      "color": "#b9d3ff"
+    },
+    {
+      "id": "alnitak",
+      "name": "Alnitak",
+      "ra": 5.679313,
+      "dec": -1.942572,
+      "magnitude": 1.8,
+      "color": "#b9d3ff"
+    },
+    {
+      "id": "saiph",
+      "name": "Saiph",
+      "ra": 5.795939,
+      "dec": -9.669722,
+      "magnitude": 2.1,
+      "color": "#c4d9ff"
+    },
+    {
+      "id": "rigel",
+      "name": "Rigel",
+      "ra": 5.242298,
+      "dec": -8.201639,
+      "magnitude": 0.1,
+      "color": "#a9c9ff"
+    }
+  ]
+}
