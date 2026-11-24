@@ -446,3 +446,131 @@ body {
         width: 100%;
     }
 }
+
+/* ========================================
+   PAINEL DE PROGRESSO DO DESAFIO
+======================================== */
+
+#challenge-progress {
+    width: 100%;
+    padding: 17px;
+
+    border: 1px solid #263841;
+    background: #0c1822;
+
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.progress-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.progress-heading h2 {
+    margin: 0;
+
+    color: #82d7c9;
+
+    font-family: "DM Mono", "Courier New", monospace;
+    font-size: 10px;
+    letter-spacing: 0.07em;
+}
+
+#progress-percentage {
+    color: #f2bb86;
+
+    font-family: "DM Mono", "Courier New", monospace;
+    font-size: 12px;
+}
+
+.progress-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.progress-stat {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.progress-stat strong {
+    color: #e9eeea;
+
+    font-family: "DM Mono", "Courier New", monospace;
+    font-size: 23px;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.progress-stat:nth-child(1) strong {
+    color: #82d7c9;
+}
+
+.progress-stat:nth-child(2) strong {
+    color: #e88771;
+}
+
+.progress-stat span {
+    color: #a4b2ae;
+    font-size: 10px;
+}
+
+.progress-track {
+    width: 100%;
+    height: 6px;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+    background: #263841;
+}
+
+#progress-fill {
+    width: 0%;
+    height: 100%;
+
+    border-radius: inherit;
+    background: #82d7c9;
+
+    transition: width 250ms ease;
+}
+
+#progress-description {
+    margin: 0;
+
+    color: #71817f;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+@media (max-width: 1100px) {
+    #challenge-progress {
+        max-width: 380px;
+    }
+}
+
+@media (max-width: 700px) {
+    #challenge-progress {
+        max-width: 100%;
+        text-align: left;
+    }
+
+    .progress-stat strong {
+        font-size: 25px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #progress-fill {
+        transition: none;
+    }
+}
+

@@ -1,8 +1,14 @@
+
+require("dotenv").config();
+
 const express = require("express");
 const path = require("node:path");
+const apiRouter = require("./routes/api.js");
 const pagesRouter = require("./routes/pages.js");
+const connectDatabase = require("./config/database.js");
 
 const app = express();
+
 const rootDirectory = __dirname;
 const port = Number(process.env.PORT) || 3000;
 
@@ -12,12 +18,37 @@ app.use("/css", express.static(path.join(rootDirectory, "css")));
 app.use("/js", express.static(path.join(rootDirectory, "js")));
 app.use("/data", express.static(path.join(rootDirectory, "data")));
 app.use("/assets", express.static(path.join(rootDirectory, "assets")));
+
+app.use("/api", apiRouter);
+
 app.use("/", pagesRouter);
 
 app.use((request, response) => {
     response.status(404).send("Página não encontrada.");
 });
 
-app.listen(port, () => {
-    console.log(`Constellarium disponível em http://localhost:${port}`);
-});
+async function startServer() {
+
+    try {
+
+        await connectDatabase();
+
+        app.listen(port, () => {
+            console.log(
+                `Constellarium disponível em http://localhost:${port}`
+            );
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Não foi possível iniciar o Constellarium."
+        );
+
+        process.exit(1);
+
+    }
+
+}
+
+startServer();

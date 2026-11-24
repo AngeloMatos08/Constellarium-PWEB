@@ -13,19 +13,23 @@ import { createShootingStars } from "./shooting-stars.js";
 const game = createGame();
 const telescope = createTelescope();
 const shootingStars = createShootingStars();
+
 game.setBackgroundStars(
     createBackgroundStars(2500)
 );
+
 console.log(
     "Estrelas decorativas:",
     game.getState().backgroundStars.slice(0, 5)
 );
+
 game.setChallengeStars(
     createChallengeStars(150)
 );
 
 console.log("Jogo Iniciado");
 console.log(game.getState());
+
 
 // ELEMENTOS DO DOM
 
@@ -53,6 +57,7 @@ const constellationRA =
 const constellationDEC =
     document.getElementById("constellation-dec");
 
+
 // CANVAS
 
 const canvas = document.getElementById("sky");
@@ -63,6 +68,7 @@ const finishButton =
 
 const resetButton =
     document.getElementById("reset-button");
+
 
 // BOTÕES DE CONTROLE DO TELESCÓPIO
 
@@ -92,7 +98,28 @@ const zoomOutButton =
 
 const zoomValue =
     document.getElementById("zoom-value");
+// PAINEL DE PROGRESSO
 
+const progressPercentage =
+    document.getElementById("progress-percentage");
+
+const progressCorrect =
+    document.getElementById("progress-correct");
+
+const progressErrors =
+    document.getElementById("progress-errors");
+
+const progressRemaining =
+    document.getElementById("progress-remaining");
+
+const progressFill =
+    document.getElementById("progress-fill");
+
+const progressTrack =
+    document.getElementById("progress-track");
+
+const progressDescription =
+    document.getElementById("progress-description");
 
 // FORMATAR ASCENSÃO RETA
 
@@ -143,15 +170,107 @@ function updateTelescopeUI() {
         `${position.fieldOfView.toFixed(1)}°`;
 }
 
+// ATUALIZAR PAINEL DE PROGRESSO
 
+function updateChallengeProgress() {
+
+    const progress =
+        game.getState().progress;
+
+    progressCorrect.textContent =
+        progress.correct;
+
+    progressErrors.textContent =
+        progress.incorrect;
+
+    progressRemaining.textContent =
+        progress.remaining;
+
+    progressPercentage.textContent =
+        `${progress.percentage}%`;
+
+    progressFill.style.width =
+        `${progress.percentage}%`;
+
+    progressTrack.setAttribute(
+        "aria-valuenow",
+        progress.percentage
+    );
+
+    if (progress.complete) {
+
+        progressDescription.textContent =
+            "Constelação concluída!";
+
+    } else if (progress.total === 0) {
+
+        progressDescription.textContent =
+            "Aguardando carregamento do desafio.";
+
+    } else if (progress.correct === 0 && progress.incorrect === 0) {
+
+        progressDescription.textContent =
+            `Encontre as ${progress.total} conexões da constelação.`;
+
+    } else {
+
+        progressDescription.textContent =
+            `Você já acertou ${progress.correct} de ${progress.total} conexões.`;
+
+    }
+
+}
 // MOVIMENTAÇÃO CONTÍNUA DO TELESCÓPIO
 
 const RA_MOVEMENT_SPEED = 10;
 const DEC_MOVEMENT_SPEED = 2;
 
+const DIAGONAL_FACTOR = 1 / Math.sqrt(2);
+
 let activeMovement = null;
 let animationFrameId = null;
 let previousFrameTime = null;
+
+
+// TECLAS DE MOVIMENTAÇÃO
+
+const keyboardKeys = {
+
+    ArrowLeft: { axis: "ra", direction: -1 },
+    ArrowRight: { axis: "ra", direction: 1 },
+
+    ArrowUp: { axis: "dec", direction: 1 },
+    ArrowDown: { axis: "dec", direction: -1 },
+
+    a: { axis: "ra", direction: -1 },
+    d: { axis: "ra", direction: 1 },
+
+    w: { axis: "dec", direction: 1 },
+    s: { axis: "dec", direction: -1 }
+
+};
+
+const pressedKeys = new Set();
+
+
+// CALCULAR VELOCIDADE DE ACORDO COM O ZOOM
+
+function getMovementSpeedFactor() {
+
+    const fieldOfView =
+        telescope.getPosition().fieldOfView;
+
+    const speedFactor = fieldOfView / 25;
+
+    return Math.max(
+        0.35,
+        Math.min(1.6, speedFactor)
+    );
+
+}
+
+
+// INICIAR MOVIMENTAÇÃO PELOS BOTÕES
 
 function startTelescopeMovement(axis, direction, event) {
 
@@ -159,14 +278,23 @@ function startTelescopeMovement(axis, direction, event) {
 
     if (activeMovement) return;
 
-    activeMovement = { axis, direction };
+    activeMovement = {
+        axis,
+        direction,
+        keyboard: false
+    };
+
     previousFrameTime = null;
 
     event.currentTarget.setPointerCapture(event.pointerId);
 
     animationFrameId =
         requestAnimationFrame(updateTelescopeMovement);
+
 }
+
+
+// ATUALIZAR MOVIMENTAÇÃO
 
 function updateTelescopeMovement(timestamp) {
 
@@ -183,28 +311,100 @@ function updateTelescopeMovement(timestamp) {
 
     previousFrameTime = timestamp;
 
-    const { axis, direction } = activeMovement;
+    let raDirection = 0;
+    let decDirection = 0;
 
-    if (axis === "ra") {
 
-        telescope.changeRA(
-            direction * RA_MOVEMENT_SPEED * deltaTime
-        );
+    // MOVIMENTAÇÃO PELO TECLADO
+
+    if (activeMovement.keyboard) {
+
+        for (const key of pressedKeys) {
+
+            const movement = keyboardKeys[key];
+
+            if (!movement) continue;
+
+            if (movement.axis === "ra") {
+                raDirection += movement.direction;
+            }
+
+            if (movement.axis === "dec") {
+                decDirection += movement.direction;
+            }
+
+        }
 
     } else {
 
-        telescope.changeDEC(
-            direction * DEC_MOVEMENT_SPEED * deltaTime
+        // MOVIMENTAÇÃO PELOS BOTÕES
+
+        if (activeMovement.axis === "ra") {
+            raDirection = activeMovement.direction;
+        }
+
+        if (activeMovement.axis === "dec") {
+            decDirection = activeMovement.direction;
+        }
+
+    }
+
+
+    // VERIFICAR MOVIMENTAÇÃO DIAGONAL
+
+    const isDiagonal =
+        raDirection !== 0 && decDirection !== 0;
+
+    const movementFactor =
+        isDiagonal ? DIAGONAL_FACTOR : 1;
+
+
+    // VELOCIDADE ADAPTÁVEL AO ZOOM
+
+    const zoomSpeedFactor =
+        getMovementSpeedFactor();
+
+
+    // MOVIMENTAR ASCENSÃO RETA
+
+    if (raDirection !== 0) {
+
+        telescope.changeRA(
+            raDirection *
+            RA_MOVEMENT_SPEED *
+            zoomSpeedFactor *
+            deltaTime *
+            movementFactor
         );
 
     }
+
+
+    // MOVIMENTAR DECLINAÇÃO
+
+    if (decDirection !== 0) {
+
+        telescope.changeDEC(
+            decDirection *
+            DEC_MOVEMENT_SPEED *
+            zoomSpeedFactor *
+            deltaTime *
+            movementFactor
+        );
+
+    }
+
 
     updateTelescopeUI();
     drawGame();
 
     animationFrameId =
         requestAnimationFrame(updateTelescopeMovement);
+
 }
+
+
+// PARAR MOVIMENTAÇÃO
 
 function stopTelescopeMovement() {
 
@@ -217,6 +417,7 @@ function stopTelescopeMovement() {
         animationFrameId = null;
 
     }
+
 }
 
 
@@ -238,9 +439,141 @@ decUpButton.addEventListener("pointerdown", event => {
     startTelescopeMovement("dec", 1, event);
 });
 
-window.addEventListener("pointerup", stopTelescopeMovement);
-window.addEventListener("pointercancel", stopTelescopeMovement);
-window.addEventListener("blur", stopTelescopeMovement);
+
+// SOLTAR BOTÕES DO MOUSE OU TOQUE
+
+window.addEventListener("pointerup", () => {
+
+    if (!activeMovement?.keyboard) {
+        stopTelescopeMovement();
+    }
+
+});
+
+window.addEventListener("pointercancel", () => {
+
+    if (!activeMovement?.keyboard) {
+        stopTelescopeMovement();
+    }
+
+});
+
+
+// CONTROLES DE MOVIMENTAÇÃO PELO TECLADO
+
+window.addEventListener("keydown", event => {
+
+    const key =
+        event.key.length === 1
+            ? event.key.toLowerCase()
+            : event.key;
+
+    const movement = keyboardKeys[key];
+
+
+    // MOVIMENTAÇÃO
+
+    if (movement) {
+
+        if (
+            event.target.matches(
+                "input, textarea, select, [contenteditable='true']"
+            )
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        if (pressedKeys.has(key)) return;
+
+        pressedKeys.add(key);
+
+        if (!activeMovement) {
+
+            activeMovement = {
+                keyboard: true
+            };
+
+            previousFrameTime = null;
+
+            animationFrameId =
+                requestAnimationFrame(updateTelescopeMovement);
+
+        }
+
+        return;
+
+    }
+
+
+    // ZOOM IN
+
+    if (key === "+" || key === "=") {
+
+        event.preventDefault();
+
+        if (event.repeat) return;
+
+        telescope.zoomIn();
+
+        updateTelescopeUI();
+        drawGame();
+
+    }
+
+
+    // ZOOM OUT
+
+    if (key === "-") {
+
+        event.preventDefault();
+
+        if (event.repeat) return;
+
+        telescope.zoomOut();
+
+        updateTelescopeUI();
+        drawGame();
+
+    }
+
+});
+
+
+// SOLTAR TECLAS
+
+window.addEventListener("keyup", event => {
+
+    const key =
+        event.key.length === 1
+            ? event.key.toLowerCase()
+            : event.key;
+
+    if (pressedKeys.has(key)) {
+
+        pressedKeys.delete(key);
+
+        if (
+            pressedKeys.size === 0 &&
+            activeMovement?.keyboard
+        ) {
+            stopTelescopeMovement();
+        }
+
+    }
+
+});
+
+
+// PERDA DE FOCO DA JANELA
+
+window.addEventListener("blur", () => {
+
+    pressedKeys.clear();
+    stopTelescopeMovement();
+
+});
 
 updateTelescopeUI();
 
@@ -261,6 +594,8 @@ let logicalHeight = 1;
 
 let previousSkyFrame = null;
 let nextShootingStar = 0;
+
+
 // ESTRELA SOB O CURSOR
 
 let hoveredStar = null;
@@ -274,6 +609,7 @@ function drawGame() {
 
     const telescopePosition =
         telescope.getPosition();
+
 
     // PROJETAR ESTRELAS REAIS
 
@@ -334,7 +670,7 @@ function drawGame() {
         hoveredStar,
         shootingStars.getStars()
     );
-
+    updateChallengeProgress();
 }
 
 
@@ -503,25 +839,190 @@ function getCanvasCoordinates(event) {
 }
 
 
-// CLIQUE / TOQUE NAS ESTRELAS
+// ESTADO DO ARRASTAR O CÉU
 
-function handlePointerDown(event) {
+let skyDrag = null;
 
-    const coordinates =
-        getCanvasCoordinates(event);
+const DRAG_THRESHOLD = 5;
 
-    if (!coordinates) return;
 
-    const star = findStarAtPosition(
-        coordinates.x,
-        coordinates.y
+// INICIAR ARRASTAR O CÉU
+
+function handleSkyPointerDown(event) {
+
+    if (event.button !== 0) return;
+
+    if (activeMovement) return;
+
+    skyDrag = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        lastX: event.clientX,
+        lastY: event.clientY,
+        dragging: false
+    };
+
+    canvas.setPointerCapture(event.pointerId);
+
+}
+
+
+// MOVIMENTAR O CÉU AO ARRASTAR
+
+function handleSkyDrag(event) {
+
+    if (
+        !skyDrag ||
+        skyDrag.pointerId !== event.pointerId
+    ) {
+        return false;
+    }
+
+    const totalX =
+        event.clientX - skyDrag.startX;
+
+    const totalY =
+        event.clientY - skyDrag.startY;
+
+    const distance = Math.hypot(
+        totalX,
+        totalY
     );
 
-    if (star) {
 
-        game.selectStar(star.id);
-        drawGame();
+    // EVITAR CONFUNDIR CLIQUE COM ARRASTO
 
+    if (
+        !skyDrag.dragging &&
+        distance < DRAG_THRESHOLD
+    ) {
+        return false;
+    }
+
+    skyDrag.dragging = true;
+
+
+    // CALCULAR DESLOCAMENTO DO PONTEIRO
+
+    const deltaX =
+        event.clientX - skyDrag.lastX;
+
+    const deltaY =
+        event.clientY - skyDrag.lastY;
+
+    skyDrag.lastX = event.clientX;
+    skyDrag.lastY = event.clientY;
+
+
+    // OBTER POSIÇÃO ATUAL DO TELESCÓPIO
+
+    const position =
+        telescope.getPosition();
+
+    const fieldOfView =
+        position.fieldOfView;
+
+    const declinationRadians =
+        position.dec * Math.PI / 180;
+
+
+    // CORRIGIR A ESCALA DA ASCENSÃO RETA
+    // PRÓXIMO AOS POLOS CELESTES
+
+    const cosDeclination = Math.max(
+        Math.abs(Math.cos(declinationRadians)),
+        0.15
+    );
+
+
+    // MOVIMENTAR ASCENSÃO RETA
+
+    const raChange =
+        -deltaX *
+        (fieldOfView / logicalWidth) *
+        4 /
+        cosDeclination;
+
+    telescope.changeRA(raChange);
+
+
+    // MOVIMENTAR DECLINAÇÃO
+
+    const decChange =
+        deltaY *
+        (fieldOfView / logicalHeight);
+
+    telescope.changeDEC(decChange);
+
+
+    updateTelescopeUI();
+    drawGame();
+
+    return true;
+
+}
+
+
+// FINALIZAR CLIQUE OU ARRASTO
+
+function handleSkyPointerUp(event) {
+
+    if (
+        !skyDrag ||
+        skyDrag.pointerId !== event.pointerId
+    ) {
+        return;
+    }
+
+    const wasDragging =
+        skyDrag.dragging;
+
+    skyDrag = null;
+
+
+    // SE NÃO ARRASTOU, TRATAR COMO CLIQUE
+
+    if (!wasDragging) {
+
+        const coordinates =
+            getCanvasCoordinates(event);
+
+        if (!coordinates) return;
+
+        const star = findStarAtPosition(
+            coordinates.x,
+            coordinates.y
+        );
+
+        if (star) {
+
+            const selectionResult =
+                game.selectStar(star.id);
+
+            // CONCLUIR AUTOMATICAMENTE QUANDO O DESAFIO ESTIVER CORRETO
+            if (selectionResult.progress?.complete) {
+                showResult(true);
+            }
+
+            drawGame();
+
+        }
+
+    }
+
+}
+
+
+// CANCELAR ARRASTO
+
+function handleSkyPointerCancel(event) {
+
+    if (
+        skyDrag &&
+        skyDrag.pointerId === event.pointerId
+    ) {
+        skyDrag = null;
     }
 
 }
@@ -530,6 +1031,12 @@ function handlePointerDown(event) {
 // IDENTIFICAÇÃO AO PASSAR O MOUSE
 
 function handlePointerMove(event) {
+
+    // PRIMEIRO VERIFICAR SE ESTAMOS ARRASTANDO
+
+    if (handleSkyDrag(event)) {
+        return;
+    }
 
     if (event.pointerType !== "mouse") return;
 
@@ -560,12 +1067,22 @@ function handlePointerMove(event) {
 
 canvas.addEventListener(
     "pointerdown",
-    handlePointerDown
+    handleSkyPointerDown
 );
 
 canvas.addEventListener(
     "pointermove",
     handlePointerMove
+);
+
+canvas.addEventListener(
+    "pointerup",
+    handleSkyPointerUp
+);
+
+canvas.addEventListener(
+    "pointercancel",
+    handleSkyPointerCancel
 );
 
 canvas.addEventListener(
@@ -585,8 +1102,9 @@ canvas.addEventListener(
 window.addEventListener("resize", resizeCanvas);
 
 resizeCanvas();
-// ANIMAÇÃO CONTÍNUA DO CÉU
 
+
+// ANIMAÇÃO CONTÍNUA DO CÉU
 
 function animateSky(timestamp) {
 
@@ -695,9 +1213,10 @@ function nextConstellation() {
     game.loadConstellation(
         currentConstellation
     );
-
+    updateChallengeProgress();
     constellationName.textContent =
         currentConstellation.name;
+
 
     // ATUALIZAR COORDENADAS DA CONSTELAÇÃO
 
@@ -754,7 +1273,7 @@ function finishGame() {
 function resetGame() {
 
     game.reset();
-
+    updateChallengeProgress();
     drawGame();
 
 }

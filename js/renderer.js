@@ -13,11 +13,7 @@ function clipLineToCanvas(x1, y1, x2, y2, width, height) {
     for (let i = 0; i < 4; i++) {
 
         if (p[i] === 0) {
-
-            if (q[i] < 0) {
-                return null;
-            }
-
+            if (q[i] < 0) return null;
             continue;
         }
 
@@ -29,9 +25,7 @@ function clipLineToCanvas(x1, y1, x2, y2, width, height) {
             t1 = Math.min(t1, t);
         }
 
-        if (t0 > t1) {
-            return null;
-        }
+        if (t0 > t1) return null;
     }
 
     return {
@@ -41,6 +35,12 @@ function clipLineToCanvas(x1, y1, x2, y2, width, height) {
         y2: y1 + t1 * dy
     };
 }
+
+
+function isChallengeStarColor(star) {
+    return star.challenge === true;
+}
+
 
 export function createRenderer(ctx, state) {
 
@@ -53,19 +53,21 @@ export function createRenderer(ctx, state) {
         shootingStars = []
     ) {
 
-        // LIMPAR O CANVAS
-
+        // FUNDO
         ctx.fillStyle = "#000814";
         ctx.fillRect(0, 0, width, height);
 
 
+        // CONEXÕES
+        for (let i = 0; i < state.connections.length; i++) {
 
-        // DESENHAR CONEXÕES
+            const connection = state.connections[i];
 
-        for (const connection of state.connections) {
+            const start =
+                projectedPositions.get(connection[0]);
 
-            const start = projectedPositions.get(connection[0]);
-            const end = projectedPositions.get(connection[1]);
+            const end =
+                projectedPositions.get(connection[1]);
 
             if (
                 !start ||
@@ -78,8 +80,6 @@ export function createRenderer(ctx, state) {
                 continue;
             }
 
-            // RECORTAR A CONEXÃO NOS LIMITES DO CANVAS
-
             const clipped = clipLineToCanvas(
                 start.x,
                 start.y,
@@ -89,31 +89,38 @@ export function createRenderer(ctx, state) {
                 height
             );
 
-            if (!clipped) {
-                continue;
-            }
+            if (!clipped) continue;
+
+            const feedback =
+                state.connectionFeedback?.[i];
+
+            const isIncorrect =
+                feedback?.status === "incorrect";
 
             ctx.save();
 
             ctx.beginPath();
-
             ctx.moveTo(clipped.x1, clipped.y1);
             ctx.lineTo(clipped.x2, clipped.y2);
 
-            ctx.strokeStyle = "rgba(76, 201, 240, 0.65)";
-            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = isIncorrect
+                ? "rgba(255, 75, 92, 0.9)"
+                : "rgba(76, 201, 240, 0.8)";
 
-            ctx.shadowBlur = 5;
-            ctx.shadowColor = "#4cc9f0";
+            ctx.lineWidth = isIncorrect ? 2.5 : 1.8;
+
+            ctx.shadowBlur = isIncorrect ? 12 : 7;
+
+            ctx.shadowColor = isIncorrect
+                ? "#ff4b5c"
+                : "#4cc9f0";
 
             ctx.stroke();
-
             ctx.restore();
         }
 
 
-        // DESENHAR ESTRELAS CADENTES
-
+        // ESTRELAS CADENTES
         for (const star of shootingStars) {
 
             const speed = Math.hypot(star.vx, star.vy);
@@ -132,13 +139,12 @@ export function createRenderer(ctx, state) {
 
             ctx.save();
 
-            const gradient =
-                ctx.createLinearGradient(
-                    star.x - dx * star.length,
-                    star.y - dy * star.length,
-                    star.x,
-                    star.y
-                );
+            const gradient = ctx.createLinearGradient(
+                star.x - dx * star.length,
+                star.y - dy * star.length,
+                star.x,
+                star.y
+            );
 
             gradient.addColorStop(
                 0,
@@ -163,10 +169,7 @@ export function createRenderer(ctx, state) {
             ctx.lineWidth = star.thickness;
             ctx.shadowBlur = 12;
             ctx.shadowColor = "#ffffff";
-
             ctx.stroke();
-
-            // CABEÇA DA ESTRELA CADENTE
 
             ctx.beginPath();
             ctx.arc(star.x, star.y, 2, 0, Math.PI * 2);
@@ -180,8 +183,7 @@ export function createRenderer(ctx, state) {
         }
 
 
-        // DESENHAR ESTRELAS DECORATIVAS
-
+        // ESTRELAS DECORATIVAS
         for (const star of state.backgroundStars) {
 
             const position =
@@ -197,17 +199,15 @@ export function createRenderer(ctx, state) {
 
             ctx.save();
 
-            // CINTILAÇÃO
+            const currentTime =
+                performance.now() / 1000;
 
-            const currentTime = performance.now() / 1000;
-
-            const twinkle =
-                (
-                    Math.sin(
-                        currentTime * star.twinkleSpeed +
-                        star.twinklePhase
-                    ) + 1
-                ) / 2;
+            const twinkle = (
+                Math.sin(
+                    currentTime * star.twinkleSpeed +
+                    star.twinklePhase
+                ) + 1
+            ) / 2;
 
             const animatedOpacity =
                 star.opacity * (0.55 + twinkle * 0.45);
@@ -215,23 +215,18 @@ export function createRenderer(ctx, state) {
             const glowIntensity =
                 (star.glow ?? 0.2) * (0.5 + twinkle * 0.8);
 
+            const glowRadius = star.highlighted
+                ? star.radius * 8
+                : star.radius * 5;
 
-            // AURA DA ESTRELA
-
-            const glowRadius =
-                star.highlighted
-                    ? star.radius * 8
-                    : star.radius * 5;
-
-            const gradient =
-                ctx.createRadialGradient(
-                    position.x,
-                    position.y,
-                    0,
-                    position.x,
-                    position.y,
-                    glowRadius
-                );
+            const gradient = ctx.createRadialGradient(
+                position.x,
+                position.y,
+                0,
+                position.x,
+                position.y,
+                glowRadius
+            );
 
             gradient.addColorStop(0, star.color);
 
@@ -262,9 +257,6 @@ export function createRenderer(ctx, state) {
             ctx.fillStyle = gradient;
             ctx.fill();
 
-
-            // NÚCLEO DA ESTRELA
-
             ctx.globalAlpha = animatedOpacity;
 
             ctx.beginPath();
@@ -279,15 +271,11 @@ export function createRenderer(ctx, state) {
             ctx.fillStyle = star.color ?? "#ffffff";
             ctx.fill();
 
-
-            // RAIOS DAS ESTRELAS DE DESTAQUE
-
             if (star.highlighted) {
 
                 ctx.save();
 
                 ctx.globalAlpha = glowIntensity * 0.5;
-
                 ctx.strokeStyle = star.color;
                 ctx.lineWidth = 1;
 
@@ -316,7 +304,6 @@ export function createRenderer(ctx, state) {
                 );
 
                 ctx.stroke();
-
                 ctx.restore();
             }
 
@@ -324,8 +311,7 @@ export function createRenderer(ctx, state) {
         }
 
 
-        // DESENHAR ESTRELAS REAIS E DE DESAFIO
-
+        // ESTRELAS REAIS E DE DESAFIO
         for (const star of [
             ...state.stars,
             ...state.challengeStars
@@ -342,45 +328,22 @@ export function createRenderer(ctx, state) {
                 continue;
             }
 
-
-            // MAGNITUDE
-
             const magnitude = star.magnitude ?? 3;
-
-
-            // IDENTIFICAR O TIPO DE ESTRELA
-
-            const isChallengeStar =
-                star.challenge === true;
-
-
-            // TAMANHO VISUAL
+            const isChallengeStar = star.challenge === true;
 
             const radius = Math.max(
                 1.5,
-                Math.min(
-                    5,
-                    4 - magnitude * 0.7
-                )
+                Math.min(5, 4 - magnitude * 0.7)
             );
-
-
-            // INTENSIDADE DA AURA
 
             const baseGlow = Math.max(
                 0.15,
-                Math.min(
-                    1,
-                    1 - magnitude / 4
-                )
+                Math.min(1, 1 - magnitude / 4)
             );
 
             const glowIntensity = isChallengeStar
                 ? baseGlow * 0.8
                 : baseGlow * 1.15;
-
-
-            // CORES
 
             const starColor =
                 star.color ?? "#ffffff";
@@ -389,20 +352,16 @@ export function createRenderer(ctx, state) {
                 ? "#b9a5ff"
                 : starColor;
 
-
-            // AURA LUMINOSA
-
             const glowRadius = radius * 5;
 
-            const gradient =
-                ctx.createRadialGradient(
-                    position.x,
-                    position.y,
-                    0,
-                    position.x,
-                    position.y,
-                    glowRadius
-                );
+            const gradient = ctx.createRadialGradient(
+                position.x,
+                position.y,
+                0,
+                position.x,
+                position.y,
+                glowRadius
+            );
 
             gradient.addColorStop(0, glowColor);
 
@@ -432,9 +391,6 @@ export function createRenderer(ctx, state) {
             ctx.fillStyle = gradient;
             ctx.fill();
 
-
-            // NÚCLEO DA ESTRELA
-
             ctx.beginPath();
             ctx.arc(
                 position.x,
@@ -448,8 +404,7 @@ export function createRenderer(ctx, state) {
             ctx.fill();
 
 
-            // DESTAQUE DA ESTRELA SELECIONADA
-
+            // ESTRELA SELECIONADA
             if (selectedStar === star.id) {
 
                 ctx.beginPath();
@@ -464,10 +419,8 @@ export function createRenderer(ctx, state) {
 
                 ctx.strokeStyle = "#1adf17";
                 ctx.lineWidth = 2;
-
                 ctx.shadowBlur = 8;
                 ctx.shadowColor = "#1adf17";
-
                 ctx.stroke();
             }
 
@@ -475,16 +428,13 @@ export function createRenderer(ctx, state) {
         }
 
 
-        // IDENTIFICAR ESTRELAS SOB O MOUSE
-
+        // TOOLTIP
         if (hoveredStar) {
 
             const star = [
                 ...state.stars,
                 ...state.challengeStars
-            ].find(
-                item => item.id === hoveredStar
-            );
+            ].find(item => item.id === hoveredStar);
 
             if (star) {
 
@@ -510,21 +460,26 @@ export function createRenderer(ctx, state) {
                     const boxWidth = textWidth + 20;
                     const boxHeight = 30;
 
-                    const boxX = position.x + 12;
-                    const boxY = position.y - 38;
+                    const boxX = Math.min(
+                        position.x + 12,
+                        width - boxWidth - 5
+                    );
 
-                    // FUNDO DO TOOLTIP
+                    const boxY = Math.max(
+                        5,
+                        position.y - 38
+                    );
 
                     ctx.fillStyle = "rgba(5, 15, 35, 0.92)";
 
-                    ctx.strokeStyle = isChallengeStarColor(star)
-                        ? "rgba(185, 165, 255, 0.6)"
-                        : "rgba(76, 201, 240, 0.5)";
+                    ctx.strokeStyle =
+                        isChallengeStarColor(star)
+                            ? "rgba(185, 165, 255, 0.6)"
+                            : "rgba(76, 201, 240, 0.5)";
 
                     ctx.lineWidth = 1;
 
                     ctx.beginPath();
-
                     ctx.roundRect(
                         boxX,
                         boxY,
@@ -535,8 +490,6 @@ export function createRenderer(ctx, state) {
 
                     ctx.fill();
                     ctx.stroke();
-
-                    // TEXTO
 
                     ctx.fillStyle = "#ffffff";
 
@@ -550,14 +503,93 @@ export function createRenderer(ctx, state) {
                 }
             }
         }
+
+
+
+
+
+        // FEEDBACK DA ÚLTIMA AÇÃO
+        drawFeedbackMessage(width, height);
+
     }
 
+
+
+
+
+    // MENSAGEM DE FEEDBACK
+    function drawFeedbackMessage(width, height) {
+
+        const feedback = state.feedbackMessage;
+
+        if (!feedback) return;
+
+        const elapsed =
+            Date.now() - feedback.timestamp;
+
+        const duration = 1800;
+
+        if (elapsed > duration) return;
+
+        const opacity = Math.max(
+            0,
+            1 - elapsed / duration
+        );
+
+        let color = "#dce9ff";
+
+        if (feedback.type === "correct") {
+            color = "#65e6a5";
+        }
+
+        if (feedback.type === "incorrect") {
+            color = "#ff737d";
+        }
+
+        ctx.save();
+
+        ctx.globalAlpha = opacity;
+
+        ctx.font = "bold 15px Arial";
+
+        const textWidth =
+            ctx.measureText(feedback.text).width;
+
+        const boxWidth = textWidth + 36;
+        const boxHeight = 40;
+
+        const x = (width - boxWidth) / 2;
+        const y = height - 62;
+
+        ctx.fillStyle = "rgba(5, 15, 35, 0.9)";
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+
+        ctx.beginPath();
+
+        ctx.roundRect(
+            x,
+            y,
+            boxWidth,
+            boxHeight,
+            8
+        );
+
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = color;
+
+        ctx.fillText(
+            feedback.text,
+            x + 18,
+            y + 25
+        );
+
+        ctx.restore();
+    }
+
+
     return { draw };
-}
 
-
-// IDENTIFICAR ESTRELA DE DESAFIO
-
-function isChallengeStarColor(star) {
-    return star.challenge === true;
 }

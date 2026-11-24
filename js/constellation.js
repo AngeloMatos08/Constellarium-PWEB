@@ -1,10 +1,11 @@
 
 export async function loadConstellations() {
 
+    // Busca os dados diretamente da API.
     const [constellationsResponse, starsResponse] =
         await Promise.all([
-            fetch("data/constellations.json"),
-            fetch("data/stars.json")
+            fetch("/api/constellations"),
+            fetch("/api/stars")
         ]);
 
     if (
